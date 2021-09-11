@@ -186,11 +186,11 @@ public final class Main {
             chooser.setDirectory(System.getProperty("user.dir"));
             chooser.setMultipleMode(false);
             chooser.setFilenameFilter((dir, file) -> file.endsWith(".kagami"));
-            chooser.setLocationRelativeTo(null);
+            chooser.setLocationRelativeTo(null); // @TODO This does not seem to work. Lets use GraphicsEnvironment to determine center location instead!
             chooser.setVisible(true);
             final String file = chooser.getFile();
             if (file != null) {
-                launch(new File(file));
+                launch(new File(file)); // @TODO This does not work when the file is outside of the current directory??
             } else {
                 System.exit(0);
             }
