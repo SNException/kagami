@@ -85,7 +85,7 @@ public final class SlideShowFileParser {
             return new SlideShowMetaData(hz, x / y);
         }
 
-        throw new ParseException("Error on line %s: Your first line must the metadata!", 1);
+        throw new ParseException("Error on line %s: Your first line must be the metadata!", 1);
     }
 
     private final class Cursor {
