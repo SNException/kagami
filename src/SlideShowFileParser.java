@@ -136,19 +136,21 @@ public final class SlideShowFileParser {
                 continue;
             }
 
-            requireSlideDecl(line, cursor);
-            final Slide slide = parseSlideDecl(lines, cursor);
+            final String slideName = requireSlideDecl(line, cursor);
+            final Slide slide = parseSlideDecl(slideName, lines, cursor);
             slideshow.add(slide);
         }
 
         return slideshow.toArray(Slide[]::new);
     }
 
-    private Slide parseSlideDecl(final String[] lines, final Cursor cursor) throws ParseException {
-        assert lines  != null;
-        assert cursor != null;
+    private Slide parseSlideDecl(final String slideName, final String[] lines, final Cursor cursor) throws ParseException {
+        assert slideName != null;
+        assert lines     != null;
+        assert cursor    != null;
 
         Color slideColor = Color.BLACK;
+        String audio = null; // @NOTE null means play NO audio (which is fine)
         final ArrayList<Slide.Element> elements = new ArrayList<>();
 
         while (cursor.advance()) {
@@ -162,16 +164,29 @@ public final class SlideShowFileParser {
 
             if (line.startsWith("[")) { // @NOTE probably another slide decl
                 cursor.unwind();
-                return new Slide(slideColor, elements.toArray(Slide.Element[]::new));  // @NOTE break to main loop
+                return new Slide(slideName, slideColor, audio, elements.toArray(Slide.Element[]::new));  // @NOTE break to main loop
             }
 
             if (isConfig(line)) {
                 final String key = line.split("=")[0];
                 final String val = line.split("=")[1];
-                if (key.toUpperCase().equals("COLOR")) {
-                    slideColor = parseArgb(val, cursor);
-                } else {
-                    throw new ParseException("Error on line %s: Unknown slide configuration name!", cursor.val + 1);
+                switch (key.toUpperCase()) {
+                    case "COLOR": {
+                        slideColor = parseArgb(val, cursor);
+                    } break;
+
+                    case "AUDIO": {
+                        final File file = new File(val);
+                        if (file.exists() && !file.isDirectory()) {
+                            audio = val;
+                        } else {
+                            throw new ParseException("Error on line %s: Audio file does not exist!", cursor.val + 1);
+                        }
+                    } break;
+
+                    default: {
+                        throw new ParseException("Error on line %s: Unknown slide configuration name!", cursor.val + 1);
+                    }
                 }
                 continue;
             }
@@ -182,7 +197,7 @@ public final class SlideShowFileParser {
         }
 
         // @NOTE EOF
-        return new Slide(slideColor, elements.toArray(Slide.Element[]::new));
+        return new Slide(slideName, slideColor, audio, elements.toArray(Slide.Element[]::new));
     }
 
     private Color parseArgb(final String str, final Cursor cursor) throws ParseException {
@@ -593,7 +608,7 @@ public final class SlideShowFileParser {
         return line.isEmpty();
     }
 
-    private void requireSlideDecl(final String line, final Cursor cursor) throws ParseException {
+    private String requireSlideDecl(final String line, final Cursor cursor) throws ParseException {
         assert line   != null;
         assert cursor != null;
 
@@ -618,6 +633,7 @@ public final class SlideShowFileParser {
         if (secName.isEmpty()) {
             throw new ParseException("Error on line %s: Empty section name is not allowed!", cursor.val + 1);
         }
+        return secName;
     }
 
     private int countChar(final String source, final char target) {

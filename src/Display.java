@@ -56,7 +56,8 @@ public final class Display {
     private boolean isMousePointerActive = false;
     private float mousePointerSize = 16;
 
-    private boolean doResize = false;
+    private boolean doResize    = false;
+    private boolean firstResize = true; // @NOTE used to indicate that we are resizing for the first time of current slideshow.
 
     private float currentAspectRatio = 0;
     private float targetAspectRatio = 0;
@@ -78,7 +79,7 @@ public final class Display {
         assert title != null;
 
         this.title = title;
-        this.slideshow = new Slide[] { new Slide(Color.BLACK) };
+        this.slideshow = new Slide[] { new Slide("DEFAULT", Color.BLACK, null) };
     }
 
     public void initAndShow(final int hz, final float targetAspectRatio) {
@@ -216,8 +217,16 @@ public final class Display {
         backBuffers = canvas.getBufferStrategy();
     }
 
+    public void destroyAllSlides() {
+        for (final Slide slide : this.slideshow) {
+            slide.destroy();
+        }
+    }
+
     public void newSlideShow(final Slide[] slideshow) {
         assert slideshow != null;
+
+        destroyAllSlides();
 
         // @TODO
         //
@@ -226,6 +235,7 @@ public final class Display {
         //
         this.slideshow = slideshow;
 
+        firstResize = true;
         doResize = true;
     }
 
@@ -242,13 +252,17 @@ public final class Display {
 
     private void nextSlide() {
         if (slideIndex < slideshow.length - 1) {
+            slideshow[slideIndex].onExit();
             slideIndex += 1;
+            slideshow[slideIndex].onEnter();
         }
     }
 
     private void prevSlide() {
         if (slideIndex > 0) {
+            slideshow[slideIndex].onExit();
             slideIndex -= 1;
+            slideshow[slideIndex].onEnter();
         }
     }
 
@@ -376,6 +390,11 @@ public final class Display {
                         slide.onResize(g, canvas.getWidth(), canvas.getHeight());
                     }
                     doResize = false;
+
+                    if (firstResize) {
+                        slideshow[slideIndex].onEnter();
+                        firstResize = false;
+                    }
                 }
 
                 if (!msg) {
@@ -529,7 +548,6 @@ public final class Display {
 
             while (running) {
                 double startTimeMillis = now();
-
                 try {
                     EventQueue.invokeAndWait(() -> {
                         input();

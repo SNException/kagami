@@ -3,20 +3,59 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
+import java.util.logging.Level;
+import javax.sound.sampled.Clip;
 
 public final class Slide {
 
+    private final String name;
     private final Color color;
+    private final String audioFilePath;
     private final Element[] elements;
     private int screenWidth  = 0;
     private int screenHeight = 0;
 
-    public Slide(final Color color, final Element... elements) {
+    private Clip clip = null;
+
+    public Slide(final String name, final Color color, final String audioFilePath, final Element... elements) {
+        assert name     != null;
         assert color    != null;
         assert elements != null : "Empty is fine but not NULL!";
 
-        this.color    = color;
-        this.elements = elements;
+        this.name          = name;
+        this.audioFilePath = audioFilePath;
+        this.color         = color;
+        this.elements      = elements;
+    }
+
+    public void onEnter() {
+        Main.logger.log(Level.INFO, "Entering: " + name);
+
+        if (audioFilePath != null) {
+            clip = AudioUtils.createAudioClip(audioFilePath, -20.0f);
+            if (clip != null) {
+                AudioUtils.playAudioClip(clip, true);
+            }
+        }
+    }
+
+    public void onExit() {
+        Main.logger.log(Level.INFO, "Leaving: " + name);
+
+        if (clip != null) {
+            AudioUtils.stopAudioClip(clip);
+        }
+    }
+
+    public void destroy() {
+        Main.logger.log(Level.INFO, "Destroy: " + name);
+
+        if (clip != null) {
+            AudioUtils.stopAudioClip(clip);
+        }
+
+        Runtime.getRuntime().gc();
+        Runtime.getRuntime().runFinalization();
     }
 
     public void update() {
@@ -341,45 +380,4 @@ public final class Slide {
             targetYPosPx = (screenHeight * (yPosPercentage * 100.0f) / 100.0f);// - (metrics.getHeight() / 2);
         }
     }
-
-    /*public void renderTextBox(final Graphics2D g, final Color fg, final String str, final Rectangle rect, final Color bg) {
-        assert g     != null;
-        assert fg    != null;
-        assert str   != null;
-        assert rect  != null;
-
-        if (bg != null) {
-            g.setColor(bg);
-            g.fillRoundRect(rect.x, rect.y, rect.width, rect.height, 4, 4);
-        }
-
-        g.setColor(fg);
-
-        final String[] words = str.split(" ");
-        final StringBuilder sbuffer = new StringBuilder(str.length());
-        final StringBuilder end = new StringBuilder(str.length());
-        for (int i = 0; i < words.length; ++i) {
-            sbuffer.append(words[i]).append(" ");
-            int strWidth = -1;
-            if (i != words.length - 1) {
-                strWidth = g.getFontMetrics().stringWidth(sbuffer.toString() + words[i + 1]);
-            } else {
-                strWidth = g.getFontMetrics().stringWidth(sbuffer.toString() + words[i]);
-            }
-            if (strWidth >= rect.width) {
-                sbuffer.append("\n");
-                end.append(sbuffer.toString());
-                sbuffer.setLength(0);
-            }
-        }
-        end.append(sbuffer.toString());
-
-        final int strHeight = g.getFontMetrics().getAscent();
-        int x = rect.x;
-        int y = rect.y;
-        final String[] lines = end.toString().split("\n");
-        for (final String line : lines) {
-            g.drawString(line, x, y += strHeight);
-        }
-    }*/
 }
