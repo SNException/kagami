@@ -190,7 +190,7 @@ public final class SlideShowFileParser {
                             throw new ParseException("Error on line %s: Audio file does not exist!", cursor.val + 1);
                         }
 
-                        audio.decibel = parseInteger(args[1], cursor.val + 1);
+                        audio.decibel = parseInteger(args[1], cursor);
                         audio.loop    = parseBoolean(args[2], cursor);
                     } break;
 
@@ -317,7 +317,7 @@ public final class SlideShowFileParser {
                     } break;
 
                     case "ROTATION": {
-                        rot = parseInteger(value, cursor.val + 1);
+                        rot = parseInteger(value, cursor);
                     } break;
 
                     case "BORDERSIZE": {
@@ -397,7 +397,7 @@ public final class SlideShowFileParser {
                     } break;
 
                     case "ROTATION": {
-                        rot = parseInteger(value, cursor.val + 1);
+                        rot = parseInteger(value, cursor);
                     } break;
 
                     case "BORDERSIZE": {
@@ -669,6 +669,13 @@ public final class SlideShowFileParser {
         assert line != null;
 
         return line.startsWith("#");
+    }
+
+    private int parseInteger(final String s, final Cursor cursor) throws ParseException {
+        assert s      != null;
+        assert cursor != null;
+
+        return parseInteger(s, cursor.val + 1);
     }
 
     private int parseInteger(final String s, final int line) throws ParseException {
