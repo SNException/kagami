@@ -166,7 +166,13 @@ public final class SlideShowFileParser {
             }
 
             if (isConfig(line)) {
-                slideColor = parseArgb(line.split("=")[1], cursor);
+                final String key = line.split("=")[0];
+                final String val = line.split("=")[1];
+                if (key.toUpperCase().equals("COLOR")) {
+                    slideColor = parseArgb(val, cursor);
+                } else {
+                    throw new ParseException("Error on line %s: Unknown slide configuration name!", cursor.val + 1);
+                }
                 continue;
             }
 
@@ -185,7 +191,7 @@ public final class SlideShowFileParser {
 
         final String[] args = str.split(";");
         if (args.length != 4) {
-            throw new ParseException("Error on line %s: Too few arguments for a color definition!\nA valid color definition would be for example:\n100;120;150;255", cursor.val + 1);
+            throw new ParseException("Error on line %s: Too few/many arguments for a color definition!\nA valid color definition would be for example:\n100;120;150;255", cursor.val + 1);
         }
 
         try {
@@ -237,6 +243,7 @@ public final class SlideShowFileParser {
         assert cursor != null;
         assert type   != null;
 
+        // @NOTE default values
         Color color = Color.BLACK;
         float x    = 0.5f;
         float y    = 0.5f;
@@ -311,6 +318,7 @@ public final class SlideShowFileParser {
         assert lines  != null;
         assert cursor != null;
 
+        // @NOTE default values
         Image image = null;
         float x    = 0.5f;
         float y    = 0.5f;
@@ -389,6 +397,7 @@ public final class SlideShowFileParser {
         assert lines  != null;
         assert cursor != null;
 
+        // @NOTE default values
         final ArrayList<String> strings = new ArrayList<>();
         Color color = Color.BLACK;
         float x    = 0.5f;

@@ -17,6 +17,8 @@ import java.util.stream.Stream;
 
 public final class Main {
 
+    public static final String VERSION = "v0.2.0";
+
     public static final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static void initLogging() {
@@ -212,6 +214,12 @@ public final class Main {
                 System.exit(1);
             }
 
+            final Lambdas.Unary<Void, SlideShowFileParser.ParseException> handleParseErrorLambda = (ex) -> {
+                if (isDebugMode()) ex.printStackTrace(System.err);
+                display.showMessage(ex.getMessage());
+                return (Void) null;
+            };
+
             try {
                 final long begin = System.nanoTime() / 1000000;
                 final Slide[] initialSlideshow   = parser.parseSlides();
@@ -220,8 +228,7 @@ public final class Main {
                 final long delta = (System.nanoTime() / 1000000) - begin;
                 logger.log(Level.INFO, String.format("Slideshow loading took %s milliseconds\n", delta));
             } catch (final SlideShowFileParser.ParseException ex) {
-                if (isDebugMode()) ex.printStackTrace(System.err);
-                display.showMessage(ex.getMessage());
+                handleParseErrorLambda.call(ex);
             }
 
             final Thread thread = new Thread(() -> {
@@ -236,8 +243,7 @@ public final class Main {
                             display.clearMessage();
                             display.newSlideShow(slideshow);
                         } catch (final SlideShowFileParser.ParseException ex) {
-                            if (isDebugMode()) ex.printStackTrace(System.err);
-                            display.showMessage(ex.getMessage());
+                            handleParseErrorLambda.call(ex);
                         } finally {
                             last = now;
                         }

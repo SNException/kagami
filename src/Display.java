@@ -102,7 +102,7 @@ public final class Display {
             mainPanel.setLayout(null); // @NOTE we will do the layout handling ourselves!
             mainPanel.add(canvas);
 
-            frame = new Frame("kagami v0.1.0 - " + title);
+            frame = new Frame(String.format("Kagami %s - %s", Main.VERSION, title));
             frame.setIconImage(new javax.swing.ImageIcon("res/icon.png").getImage());
             frame.setLayout(new BorderLayout());
             frame.add(mainPanel, BorderLayout.CENTER);
