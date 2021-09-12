@@ -53,9 +53,6 @@ public final class Slide {
         if (clip != null) {
             AudioUtils.stopAudioClip(clip);
         }
-
-        Runtime.getRuntime().gc();
-        Runtime.getRuntime().runFinalization();
     }
 
     public void update() {

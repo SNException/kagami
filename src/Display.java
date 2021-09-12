@@ -221,6 +221,9 @@ public final class Display {
         for (final Slide slide : this.slideshow) {
             slide.destroy();
         }
+
+        Runtime.getRuntime().gc();
+        Runtime.getRuntime().runFinalization();
     }
 
     public void newSlideShow(final Slide[] slideshow) {
