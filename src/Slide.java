@@ -10,20 +10,28 @@ public final class Slide {
 
     private final String name;
     private final Color color;
-    private final String audioFilePath;
+    private final Audio audio;;
     private final Element[] elements;
+
     private int screenWidth  = 0;
     private int screenHeight = 0;
 
     private Clip clip = null;
 
-    public Slide(final String name, final Color color, final String audioFilePath, final Element... elements) {
+    public static final class Audio {
+        public String file   = null;
+        public float decibel = 0;
+        public boolean loop  = false;
+    }
+
+
+    public Slide(final String name, final Color color, final Audio audio, final Element... elements) {
         assert name     != null;
         assert color    != null;
         assert elements != null : "Empty is fine but not NULL!";
 
         this.name          = name;
-        this.audioFilePath = audioFilePath;
+        this.audio         = audio;
         this.color         = color;
         this.elements      = elements;
     }
@@ -31,10 +39,10 @@ public final class Slide {
     public void onEnter() {
         Main.logger.log(Level.INFO, "Entering: " + name);
 
-        if (audioFilePath != null) {
-            clip = AudioUtils.createAudioClip(audioFilePath, -20.0f);
+        if (audio != null) {
+            clip = AudioUtils.createAudioClip(audio.file, audio.decibel);
             if (clip != null) {
-                AudioUtils.playAudioClip(clip, true);
+                AudioUtils.playAudioClip(clip, audio.loop);
             }
         }
     }

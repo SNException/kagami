@@ -150,7 +150,7 @@ public final class SlideShowFileParser {
         assert cursor    != null;
 
         Color slideColor = Color.BLACK;
-        String audio = null; // @NOTE null means play NO audio (which is fine)
+        Slide.Audio audio = null; // @NOTE null means play NO audio (which is fine)
         final ArrayList<Slide.Element> elements = new ArrayList<>();
 
         while (cursor.advance()) {
@@ -176,12 +176,22 @@ public final class SlideShowFileParser {
                     } break;
 
                     case "AUDIO": {
-                        final File file = new File(val);
+                        audio = new Slide.Audio();
+
+                        final String[] args = val.split(";");
+                        if (args.length != 3) {
+                            throw new ParseException("Error on line %s: Too few/many arguments for audio configuration!", cursor.val + 1);
+                        }
+
+                        final File file = new File(args[0]);
                         if (file.exists() && !file.isDirectory()) {
-                            audio = val;
+                            audio.file = args[0];
                         } else {
                             throw new ParseException("Error on line %s: Audio file does not exist!", cursor.val + 1);
                         }
+
+                        audio.decibel = parseInteger(args[1], cursor.val + 1);
+                        audio.loop    = parseBoolean(args[2], cursor);
                     } break;
 
                     default: {
