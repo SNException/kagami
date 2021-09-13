@@ -39,7 +39,7 @@ public final class AudioUtils {
             gainControl.setValue(decibel);
             return clip;
         } catch (final Exception ex) {
-            Main.logger.log(Level.SEVERE, ex.getMessage(), ex.toString());
+            Main.logger.log(Level.SEVERE, ex.getMessage(), ex);
             return null;
         }
     }

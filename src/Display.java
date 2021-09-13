@@ -571,7 +571,7 @@ public final class Display {
                     } else {
                         // @TODO: Display dialog to user?
                         if (Main.isDebugMode()) ex.printStackTrace(System.err);
-                        Main.logger.log(Level.SEVERE, ex.getMessage(), ex.toString());
+                        Main.logger.log(Level.SEVERE, ex.getMessage(), ex);
                     }
                 } catch (final InterruptedException ex) {
                     assert false : "Not supposed to interrupt this thread!";
