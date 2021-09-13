@@ -428,6 +428,7 @@ public final class SlideShowFileParser {
         float x    = 0.5f;
         float y    = 0.5f;
         float size = 0.5f;
+        int rot    = 0;
         String font = "Serfi";
         int style = Font.PLAIN;
         boolean underline     = false;
@@ -448,7 +449,7 @@ public final class SlideShowFileParser {
                 if (strings.size() == 0) {
                     strings.add("LINE=?????");
                 }
-                return new Slide.Text(strings.toArray(String[]::new), color, font, style, underline, strikethrough, reversed, x, y, size);
+                return new Slide.Text(strings.toArray(String[]::new), color, font, style, underline, strikethrough, reversed, x, y, size, rot);
             }
 
             if (isConfig(line)) {
@@ -473,6 +474,10 @@ public final class SlideShowFileParser {
 
                     case "SIZE": {
                         size = parseFloat(value, cursor);
+                    } break;
+
+                    case "ROTATION": {
+                        rot = parseInteger(value, cursor);
                     } break;
 
                     case "FONT": {
@@ -526,7 +531,7 @@ public final class SlideShowFileParser {
         if (strings.size() == 0) {
             strings.add("LINE=?????");
         }
-        return new Slide.Text(strings.toArray(String[]::new), color, font, style, underline, strikethrough, reversed, x, y, size);
+        return new Slide.Text(strings.toArray(String[]::new), color, font, style, underline, strikethrough, reversed, x, y, size, rot);
     }
 
     private String requireSlideElement(final String line, final Cursor cursor) throws ParseException {

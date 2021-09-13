@@ -277,6 +277,8 @@ public final class Slide {
         private final float yPosPercentage;
         private final float sizePercentage;
 
+        private final float rotation;
+
         private float targetXPosPx   = 0;
         private float targetYPosPx   = 0;
         private float fontSize        = 0;
@@ -285,7 +287,7 @@ public final class Slide {
         private boolean strikeThrough = false;
         private Font font             = null;
 
-        public Text(final String[] lines, final Color color, final String fontName, final int style, final boolean underline, final boolean strikeThrough, final boolean reversed, final float xPosPercentage, final float yPosPercentage, final float sizePercentage) {
+        public Text(final String[] lines, final Color color, final String fontName, final int style, final boolean underline, final boolean strikeThrough, final boolean reversed, final float xPosPercentage, final float yPosPercentage, final float sizePercentage, final float rotation) {
             assert lines    != null;
             assert color    != null;
             assert fontName != null;
@@ -310,6 +312,7 @@ public final class Slide {
             this.xPosPercentage = xPosPercentage;
             this.yPosPercentage = yPosPercentage;
             this.sizePercentage = sizePercentage;
+            this.rotation       = rotation;
         }
 
         @Override
@@ -320,12 +323,17 @@ public final class Slide {
         public void render(final Graphics2D g)  {
             g.setFont(font.deriveFont(fontSize));
 
+            final var oldState = g.getTransform();
+
             // @NOTE we split by the actual char sequence of '\n' (backslash followed by n) and not an actual line feed.
             // @TODO we probably also want automatic wrapping (insertion of \n) when a line hits the end of the frame
             final int strHeight = g.getFontMetrics().getHeight();
             float y = targetYPosPx;
             for (int i = 0, l = lines.length; i < l; ++i) {
                 final String line = lines[i];
+
+                g.rotate(Math.toRadians(rotation), targetXPosPx + (g.getFontMetrics().stringWidth(line) / 2), targetYPosPx + (strHeight / 2));
+
                 if (i != 0) {
                     g.setColor(color);
                     g.drawString(line, (int) targetXPosPx, y += strHeight);
@@ -360,6 +368,7 @@ public final class Slide {
                         g.fillRect((int) targetXPosPx, (int) y - (strHeight / 2) + ((int) lineHeight), (int) lineWidth, strHeight / 8);
                     }
                 }
+                g.setTransform(oldState);
             }
         }
 
