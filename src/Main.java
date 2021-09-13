@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
@@ -35,7 +34,7 @@ public final class Main {
     private static void loadAllClassesIntoMemory() {
         final String root = new File(Main.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getAbsolutePath();
         final ArrayList<String> files = new ArrayList<>();
-        try (final Stream<Path> stream = Files.walk(Paths.get(root), Integer.MAX_VALUE)) {
+        try (final Stream<Path> stream = Files.walk(Path.of(root), Integer.MAX_VALUE)) {
             files.addAll(stream.map(String::valueOf).sorted().collect(Collectors.toList()));
         } catch (final IOException ex) {
             logger.log(Level.INFO, "Failed to find all class files to load.", ex);
@@ -44,7 +43,7 @@ public final class Main {
 
         for (int i = 0, l = files.size(); i < l; ++i) {
             final String file = files.get(i);
-            if (Files.isDirectory(Paths.get(file)) || !file.endsWith(".class")) {
+            if (Files.isDirectory(Path.of(file)) || !file.endsWith(".class")) {
                 continue;
             }
 
@@ -129,7 +128,7 @@ public final class Main {
                             // Example:
                             // gvim.exe --remote-silent +__LINE__ src/__FILE__
                             // @TODO: Does not work when the assertions is thrown inside an inner class
-                            final String assertEditor = new String(Files.readAllBytes(Paths.get("assert_editor.txt"))).replaceAll("__LINE__", String.valueOf(line)).replace("__FILE__", assertFilePath);
+                            final String assertEditor = new String(Files.readAllBytes(Path.of("assert_editor.txt"))).replaceAll("__LINE__", String.valueOf(line)).replace("__FILE__", assertFilePath);
                             Runtime.getRuntime().exec(assertEditor);
                         } catch (final IOException ex) {
                             System.err.println("failed to open editor: " + ex.getMessage());

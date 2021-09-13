@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -72,14 +71,14 @@ public final class build {
     }
 
     private static String[] getAllFiles(final String dir, final String prefix) {
-        try (final Stream<Path> stream = Files.walk(Paths.get(dir), Integer.MAX_VALUE)) {
+        try (final Stream<Path> stream = Files.walk(Path.of(dir), Integer.MAX_VALUE)) {
             final ArrayList<String> files = new ArrayList<>(stream.map(String::valueOf).sorted().collect(Collectors.toList()));
             final ArrayList<String> result = new ArrayList<>(files.size());
 
             for (int i = 0, l = files.size(); i < l; ++i) {
                 final String file = files.get(i);
 
-                if (Files.isDirectory(Paths.get(file))) {
+                if (Files.isDirectory(Path.of(file))) {
                     continue;
                 }
 
@@ -99,7 +98,7 @@ public final class build {
 
     private static boolean removeDir(final String dir) {
         try {
-            final Path path = Paths.get(dir);
+            final Path path = Path.of(dir);
 
             Files.walk(path)
                     .map(Path::toFile)
@@ -136,7 +135,7 @@ public final class build {
 
 
         // the directory will be recreated for us when we invoke the compiler with '-d'.
-        if (Files.exists(Paths.get(OUTPUT_DIR))) {
+        if (Files.exists(Path.of(OUTPUT_DIR))) {
             final boolean success = removeDir(OUTPUT_DIR);
             if (!success) {
                 System.out.println("Failed to cleanup previous output files!");
