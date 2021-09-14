@@ -4,6 +4,7 @@ import java.awt.Font;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Image;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -429,7 +430,7 @@ public final class SlideShowFileParser {
         float y    = 0.5f;
         float size = 0.5f;
         int rot    = 0;
-        String font = "Serfi";
+        String font = "Serfi"; // @NOTE bundles with the JDK so it is always available
         int style = Font.PLAIN;
         boolean underline     = false;
         boolean strikethrough = false;
@@ -732,18 +733,19 @@ public final class SlideShowFileParser {
     }
 
     private boolean readFileIntoMemory(final StringBuilder buffer) {
-        try (final FileInputStream in = new FileInputStream(file)) {
-            while (true) {
-                final byte[] buf = new byte[4096]; // @NOTE likely a page
-                final int readBytes = in.read(buf);
-                if (readBytes < 0) {
-                    break;
-                }
-                buffer.append(new String(buf, 0, readBytes, StandardCharsets.UTF_8));
-            }
-            return true;
-        } catch (final Exception ex) {
+        final FResult<FileInputStream> handleResult = SFile.openFileForReading(file.getAbsolutePath());
+        if (handleResult.failed) {
+            Main.logger.log(Level.SEVERE, handleResult.error.getMessage(), handleResult.error);
             return false;
         }
+
+        final FResult<byte[]> readResult = SFile.read(handleResult.data);
+        if (readResult.failed) {
+            Main.logger.log(Level.SEVERE, handleResult.error.getMessage(), handleResult.error);
+            return false;
+        }
+        SFile.close(handleResult.data);
+        buffer.append(new String(readResult.data));
+        return true;
     }
 }
