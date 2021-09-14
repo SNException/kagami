@@ -259,7 +259,7 @@ public final class Main {
                         //
                         // @TODO There should be a program argument (?) to turn off hotloading.
                         // This would be useful when you are done making frequent changes to your presentation.
-                        // Would be system resource waste to have this poll during presentation. Perhaps disable 
+                        // Would be system resource waste to have this poll during presentation. Perhaps disable
                         // hotloading when we are in 'presentation mode' (fullscreen).
                         //
                         Thread.sleep(250, 0);
