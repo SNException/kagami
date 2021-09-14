@@ -183,7 +183,6 @@ public final class Slide {
         }
 
         @Override
-        strictfp
         public void onResize(final Graphics2D g, final int screenWidth, final int screenHeight) {
             targetWidthPx    = screenWidth   * (widthPercentage      * 100.0f) / 100.0f;
             targetHeightPx   = screenHeight  * (heightPercentage     * 100.0f) / 100.0f;
@@ -257,7 +256,6 @@ public final class Slide {
         }
 
         @Override
-        strictfp
         public void onResize(final Graphics2D g, final int screenWidth, final int screenHeight) {
             targetWidthPx    = screenWidth   * (widthPercentage      * 100.0f) / 100.0f;
             targetHeightPx   = screenHeight  * (heightPercentage     * 100.0f) / 100.0f;
@@ -373,7 +371,6 @@ public final class Slide {
         }
 
         @Override
-        strictfp
         public void onResize(final Graphics2D g, final int screenWidth, final int screenHeight) {
             final float targetWidthPx = screenWidth * (sizePercentage * 100.0f) / 100.0f;
             fontSize = 0.0f;

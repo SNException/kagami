@@ -280,12 +280,16 @@ public final class Display {
         } else if (inputHandler.isKeyDown(KeyEvent.VK_PAGE_DOWN)) {
             slideIndex = 0;
         } else if (inputHandler.isKeyDown(KeyEvent.VK_F12)) {
-            // @TODO In java 17 we can use yield
-            switch (debugLevel) {
-                case NONE     : debugLevel = DebugLevel.MINIMAL;  break;
-                case MINIMAL  : debugLevel = DebugLevel.EXTENDED; break;
-                case EXTENDED : debugLevel = DebugLevel.NONE;     break;
-            }
+            // @NOTE With 'yield' we do not need either a break statement nor do we need a default case
+            // since we get a compiler error when we do not cover all cases (only for enums of course).
+            // Wow, an actual useful feature once in a while!
+            // @NOTE :no_arrow_switch_case: I would like to use the '->' syntax however my editor messes up
+            // the highlighing then so I can't.
+            debugLevel = switch (debugLevel) {
+                case NONE     : yield DebugLevel.MINIMAL;
+                case MINIMAL  : yield DebugLevel.EXTENDED;
+                case EXTENDED : yield DebugLevel.NONE;
+            };
         } else if (inputHandler.isKeyDown(KeyEvent.VK_M)) {
             isMousePointerActive = !isMousePointerActive;
             if (!frame.isUndecorated()) { // @NOTE when we are in 'presentation mode' the cursor is already invisible

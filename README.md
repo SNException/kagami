@@ -72,7 +72,7 @@ y=0.8
 
 ## How to build
 
-You need to have OpenJDK 11.0.1 installed on your system.
+You need to have OpenJDK 17 installed on your system.
 
 ### Universal
 

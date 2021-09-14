@@ -17,7 +17,7 @@ public final class build {
     private static final String OUTPUT_DIR      = "bin";
     private static final String SOURCES_FILE    = "sources.txt";
     private static final String COMPILER        = new File(System.getProperty("java.home") + File.separator + "bin" + File.separator + "javac.exe").getAbsolutePath();
-    private static final String RELEASE         = "11";
+    private static final String RELEASE         = "17";
     private static final String[] COMPILER_LINE = new String[] {COMPILER, "-J-Xms2048m", "-J-Xmx2048m", "-J-XX:+UseG1GC", "-Xdiags:verbose", "-Xlint:all", "-Xmaxerrs", "5", "-encoding", "UTF8", "--release", RELEASE, "-g", "-d", OUTPUT_DIR, "-sourcepath", SOURCE_DIR, "@" + SOURCES_FILE};
 
     private static final String JVM_EXE         = new File(System.getProperty("java.home") + File.separator + "bin" + File.separator + "java.exe").getAbsolutePath();

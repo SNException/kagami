@@ -486,28 +486,14 @@ public final class SlideShowFileParser {
                     } break;
 
                     case "STYLE": {
-                        // @TODO: In Java 17 we can use yield!!
-                        switch (value) {
-                            case "PLAIN": {
-                                style = Font.PLAIN;
-                            } break;
-
-                            case "BOLD": {
-                                style = Font.BOLD;
-                            } break;
-
-                            case "ITALIC": {
-                                style = Font.ITALIC;
-                            } break;
-
-                            case "BOLDITALIC": {
-                                style = Font.BOLD | Font.ITALIC;
-                            } break;
-
-                            default: {
-                                throw new ParseException("Error on line %s: Unknown font style! Can only be PLAIN, BOLD, ITALIC or BOLDITALIC!", cursor.val + 1);
-                            }
-                        }
+                        // @NOTE :no_arrow_switch_case:
+                        style = switch (value) {
+                            case "PLAIN"      : yield Font.PLAIN;
+                            case "BOLD"       : yield Font.BOLD;
+                            case "ITALIC"     : yield Font.ITALIC;
+                            case "BOLDITALIC" : yield Font.ITALIC;
+                            default           : throw new ParseException("Error on line %s: Unknown font style! Can only be PLAIN, BOLD, ITALIC or BOLDITALIC!", cursor.val + 1);
+                        };
                     } break;
 
                     case "UNDERLINE": {
