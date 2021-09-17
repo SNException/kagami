@@ -33,6 +33,7 @@ public final class Slide {
     private int screenWidth  = 0;
     private int screenHeight = 0;
 
+    private GradientPaint gradient;
     private float gradientTargetX1;
     private float gradientTargetY1;
     private float gradientTargetX2;
@@ -85,7 +86,6 @@ public final class Slide {
 
     public void render(final Graphics2D g) {
         if (argb.color2 != null) { // @NOTE if the second color is set we want to treat it as a gradient
-            final GradientPaint gradient = new GradientPaint(gradientTargetX1, gradientTargetY1, argb.color1, gradientTargetX2, gradientTargetY2, argb.color2, argb.cyclic);
             g.setPaint(gradient);
         } else {
             g.setColor(argb.color1);
@@ -113,6 +113,7 @@ public final class Slide {
             gradientTargetY1 = screenHeight * (argb.y2 * 100.0f) / 100.0f;
             gradientTargetX2 = screenWidth  * (argb.x2 * 100.0f) / 100.0f;
             gradientTargetY2 = screenHeight * (argb.y2 * 100.0f) / 100.0f;
+            gradient = new GradientPaint(gradientTargetX1, gradientTargetY1, argb.color1, gradientTargetX2, gradientTargetY2, argb.color2, argb.cyclic);
         }
     }
 
