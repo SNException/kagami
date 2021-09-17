@@ -150,7 +150,8 @@ public final class SlideShowFileParser {
         assert lines     != null;
         assert cursor    != null;
 
-        Color slideColor = Color.BLACK;
+        Color slideColor1 = Color.BLACK;
+        Color slideColor2 = null;
         Slide.Audio audio = null; // @NOTE null means play NO audio (which is fine)
         final ArrayList<Slide.Element> elements = new ArrayList<>();
 
@@ -165,7 +166,11 @@ public final class SlideShowFileParser {
 
             if (line.startsWith("[")) { // @NOTE probably another slide decl
                 cursor.unwind();
-                return new Slide(slideName, slideColor, audio, elements.toArray(Slide.Element[]::new));  // @NOTE break to main loop
+                if (slideColor2 == null) {
+                    return new Slide(slideName, slideColor1, audio, elements.toArray(Slide.Element[]::new));  // @NOTE break to main loop
+                } else {
+                    return new Slide(slideName, new Color[] {slideColor1, slideColor2}, audio, elements.toArray(Slide.Element[]::new));  // @NOTE break to main loop
+                }
             }
 
             if (isConfig(line)) {
@@ -173,7 +178,15 @@ public final class SlideShowFileParser {
                 final String val = line.split("=")[1];
                 switch (key.toUpperCase()) {
                     case "COLOR": {
-                        slideColor = parseArgb(val, cursor);
+                        final String[] gradient = val.split("-->"); // @NOTE: Gradient
+                        if (gradient.length == 1) {
+                            slideColor1 = parseArgb(val, cursor);
+                        } else if (gradient.length == 2) {
+                            slideColor1 = parseArgb(gradient[0], cursor);
+                            slideColor2 = parseArgb(gradient[1], cursor);
+                        } else {
+                            throw new ParseException("Error on line %s: Must not have more than two gradient colors!", cursor.val + 1);
+                        }
                     } break;
 
                     case "AUDIO": {
@@ -208,7 +221,11 @@ public final class SlideShowFileParser {
         }
 
         // @NOTE EOF
-        return new Slide(slideName, slideColor, audio, elements.toArray(Slide.Element[]::new));
+        if (slideColor2 == null) {
+            return new Slide(slideName, slideColor1, audio, elements.toArray(Slide.Element[]::new));  // @NOTE break to main loop
+        } else {
+            return new Slide(slideName, new Color[] {slideColor1, slideColor2}, audio, elements.toArray(Slide.Element[]::new));  // @NOTE break to main loop
+        }
     }
 
     private Color parseArgb(final String str, final Cursor cursor) throws ParseException {

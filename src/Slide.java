@@ -2,6 +2,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.GradientPaint;
 import java.awt.Graphics2D;
 import java.util.logging.Level;
 import javax.sound.sampled.Clip;
@@ -9,7 +10,7 @@ import javax.sound.sampled.Clip;
 public final class Slide {
 
     private final String name;
-    private final Color color;
+    private final Color[] colors;
     private final Audio audio;;
     private final Element[] elements;
 
@@ -24,15 +25,17 @@ public final class Slide {
         public boolean loop  = false;
     }
 
-
     public Slide(final String name, final Color color, final Audio audio, final Element... elements) {
+        this(name, new Color[] {color}, audio, elements);
+    }
+
+    public Slide(final String name, final Color[] colors, final Audio audio, final Element... elements) {
         assert name     != null;
-        assert color    != null;
-        assert elements != null : "Empty is fine but not NULL!";
+        assert colors   != null;
 
         this.name          = name;
         this.audio         = audio;
-        this.color         = color;
+        this.colors        = colors;
         this.elements      = elements;
     }
 
@@ -71,7 +74,13 @@ public final class Slide {
 
     public void render(final Graphics2D g) {
         // @NOTE render background
-        g.setColor(color);
+        if (colors.length == 2) {
+            final GradientPaint gp = new GradientPaint(0, 0, colors[0], 0, screenHeight / 2, colors[1]);
+            g.setPaint(gp);
+        } else {
+            g.setColor(colors[0]);
+        }
+
         g.fillRect(0, 0, screenWidth, screenHeight);
 
         // @NOTE render all the elements on top of the slide
