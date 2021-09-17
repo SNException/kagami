@@ -150,6 +150,7 @@ public final class SlideShowFileParser {
         assert lines     != null;
         assert cursor    != null;
 
+        Slide.Argb argb = new Slide.Argb();
         Color slideColor1 = Color.BLACK;
         Color slideColor2 = null;
         Slide.Audio audio = null; // @NOTE null means play NO audio (which is fine)
@@ -166,11 +167,7 @@ public final class SlideShowFileParser {
 
             if (line.startsWith("[")) { // @NOTE probably another slide decl
                 cursor.unwind();
-                if (slideColor2 == null) {
-                    return new Slide(slideName, slideColor1, audio, elements.toArray(Slide.Element[]::new));  // @NOTE break to main loop
-                } else {
-                    return new Slide(slideName, new Color[] {slideColor1, slideColor2}, audio, elements.toArray(Slide.Element[]::new));  // @NOTE break to main loop
-                }
+                return new Slide(slideName, argb, audio, elements.toArray(Slide.Element[]::new));  // @NOTE break to main loop
             }
 
             if (isConfig(line)) {
@@ -178,14 +175,20 @@ public final class SlideShowFileParser {
                 final String val = line.split("=")[1];
                 switch (key.toUpperCase()) {
                     case "COLOR": {
-                        final String[] gradient = val.split("-->"); // @NOTE: Gradient
+                        final String[] gradient = val.split(";"); // @NOTE: Gradient
                         if (gradient.length == 1) {
-                            slideColor1 = parseArgb(val, cursor);
-                        } else if (gradient.length == 2) {
-                            slideColor1 = parseArgb(gradient[0], cursor);
-                            slideColor2 = parseArgb(gradient[1], cursor);
+                            argb.color1 = parseArgb(val, cursor);
+                        } else if (gradient.length == 7) {
+                            argb.color1 = parseArgb(gradient[0], cursor);
+                            argb.color2 = parseArgb(gradient[1], cursor);
+
+                            argb.x1 = parseFloat(gradient[2], cursor);
+                            argb.y1 = parseFloat(gradient[3], cursor);
+                            argb.x2 = parseFloat(gradient[4], cursor);
+                            argb.y2 = parseFloat(gradient[5], cursor);
+                            argb.cyclic = parseBoolean(gradient[6], cursor);
                         } else {
-                            throw new ParseException("Error on line %s: Must not have more than two gradient colors!", cursor.val + 1);
+                            throw new ParseException("Error on line %s: Invalid amount of arguments for gradient color specification!", cursor.val + 1);
                         }
                     } break;
 
@@ -221,27 +224,35 @@ public final class SlideShowFileParser {
         }
 
         // @NOTE EOF
-        if (slideColor2 == null) {
-            return new Slide(slideName, slideColor1, audio, elements.toArray(Slide.Element[]::new));  // @NOTE break to main loop
-        } else {
-            return new Slide(slideName, new Color[] {slideColor1, slideColor2}, audio, elements.toArray(Slide.Element[]::new));  // @NOTE break to main loop
-        }
+        return new Slide(slideName, argb, audio, elements.toArray(Slide.Element[]::new));  // @NOTE break to main loop
     }
 
     private Color parseArgb(final String str, final Cursor cursor) throws ParseException {
         assert str    != null;
         assert cursor != null;
 
-        final String[] args = str.split(";");
-        if (args.length != 4) {
-            throw new ParseException("Error on line %s: Too few/many arguments for a color definition!\nA valid color definition would be for example:\n100;120;150;255", cursor.val + 1);
+        if (str.length() < 8) {
+            throw new ParseException("Error on line %s: Invalid color value!", cursor.val + 1);
         }
 
+        //
+        // @TODO: What about if we pass a hex value which is longer than 8?
+        // We have to check whether the last char is a semicolon.
+        //
+
+        final char[] chars = str.toCharArray();
+
+        final String xr = chars[0] + "" + chars[1];
+        final String xg = chars[2] + "" + chars[3];
+        final String xb = chars[4] + "" + chars[5];
+        final String xa = chars[6] + "" + chars[7];
+
         try {
-            final int r = Integer.parseInt(args[0]);
-            final int g = Integer.parseInt(args[1]);
-            final int b = Integer.parseInt(args[2]);
-            final int a = Integer.parseInt(args[3]);
+
+            final int r = Integer.parseInt(xr, 16);
+            final int g = Integer.parseInt(xg, 16);
+            final int b = Integer.parseInt(xb, 16);
+            final int a = Integer.parseInt(xa, 16);
 
             if (r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255 || a < 0 || a > 255) {
                 throw new ParseException("Error on line %s: ARGB values out of range! Must be in between 0 - 255.", cursor.val + 1);

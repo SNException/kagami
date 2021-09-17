@@ -79,7 +79,7 @@ public final class Display {
         assert title != null;
 
         this.title = title;
-        this.slideshow = new Slide[] { new Slide("DEFAULT", Color.BLACK, null) };
+        this.slideshow = new Slide[] { new Slide("DEFAULT", new Slide.Argb(), null) };
     }
 
     public void initAndShow(final int hz, final float targetAspectRatio) {

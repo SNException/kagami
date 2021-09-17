@@ -9,34 +9,45 @@ import javax.sound.sampled.Clip;
 
 public final class Slide {
 
-    private final String name;
-    private final Color[] colors;
-    private final Audio audio;;
-    private final Element[] elements;
-
-    private int screenWidth  = 0;
-    private int screenHeight = 0;
-
-    private Clip clip = null;
-
     public static final class Audio {
         public String file   = null;
         public float decibel = 0;
         public boolean loop  = false;
     }
 
-    public Slide(final String name, final Color color, final Audio audio, final Element... elements) {
-        this(name, new Color[] {color}, audio, elements);
+    public static final class Argb {
+        public Color color1 = Color.BLACK;
+        public Color color2 = null;
+        public float x1     = 0;
+        public float y1     = 0;
+        public float x2     = 0;
+        public float y2     = 0;
+        public boolean cyclic = false;
     }
 
-    public Slide(final String name, final Color[] colors, final Audio audio, final Element... elements) {
-        assert name     != null;
-        assert colors   != null;
+    private final String name;
+    private final Argb argb;
+    private final Audio audio;;
+    private final Element[] elements;
 
-        this.name          = name;
-        this.audio         = audio;
-        this.colors        = colors;
-        this.elements      = elements;
+    private int screenWidth  = 0;
+    private int screenHeight = 0;
+
+    private float gradientTargetX1;
+    private float gradientTargetY1;
+    private float gradientTargetX2;
+    private float gradientTargetY2;
+
+    private Clip clip = null;
+
+    public Slide(final String name, final Argb argb, final Audio audio, final Element... elements) {
+        assert name != null;
+        assert argb != null;
+
+        this.name      = name;
+        this.audio     = audio;
+        this.argb      = argb;
+        this.elements  = elements;
     }
 
     public void onEnter() {
@@ -73,18 +84,17 @@ public final class Slide {
     }
 
     public void render(final Graphics2D g) {
-        // @NOTE render background
-        if (colors.length == 2) {
-            final GradientPaint gp = new GradientPaint(0, 0, colors[0], 0, screenHeight / 2, colors[1]);
-            g.setPaint(gp);
+        if (argb.color2 != null) { // @NOTE if the second color is set we want to treat it as a gradient
+            final GradientPaint gradient = new GradientPaint(gradientTargetX1, gradientTargetY1, argb.color1, gradientTargetX2, gradientTargetY2, argb.color2, argb.cyclic);
+            g.setPaint(gradient);
         } else {
-            g.setColor(colors[0]);
+            g.setColor(argb.color1);
         }
 
+        // @NOTE slide background
         g.fillRect(0, 0, screenWidth, screenHeight);
 
         // @NOTE render all the elements on top of the slide
-        // @TODO: Think about order (z coordinate?)!
         for (final Element e : elements) {
             e.render(g);
         }
@@ -96,6 +106,13 @@ public final class Slide {
 
         for (final Element e : elements) {
             e.onResize(g, screenWidth, screenHeight);
+        }
+
+        if (argb.color2 != null) { // @NOTE we do not need to calculate these if we do not have a second color (gradient)
+            gradientTargetX1 = screenWidth  * (argb.x1 * 100.0f) / 100.0f;
+            gradientTargetY1 = screenHeight * (argb.y2 * 100.0f) / 100.0f;
+            gradientTargetX2  = screenWidth  * (argb.x2 * 100.0f) / 100.0f;
+            gradientTargetY2  = screenHeight * (argb.y2 * 100.0f) / 100.0f;
         }
     }
 
