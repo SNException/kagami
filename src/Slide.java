@@ -295,7 +295,7 @@ public final class Slide {
     public static final class Text implements Element {
 
         private final String[] lines;
-        private final Color color;
+        private final Argb argb;
         private final String fontName;
 
         private final float xPosPercentage;
@@ -312,9 +312,15 @@ public final class Slide {
         private boolean strikeThrough = false;
         private Font font             = null;
 
-        public Text(final String[] lines, final Color color, final String fontName, final int style, final boolean underline, final boolean strikeThrough, final boolean reversed, final float xPosPercentage, final float yPosPercentage, final float sizePercentage, final float rotation) {
+        private GradientPaint gradient;
+        private float gradientTargetX1;
+        private float gradientTargetY1;
+        private float gradientTargetX2;
+        private float gradientTargetY2;
+
+        public Text(final String[] lines, final Argb argb, final String fontName, final int style, final boolean underline, final boolean strikeThrough, final boolean reversed, final float xPosPercentage, final float yPosPercentage, final float sizePercentage, final float rotation) {
             assert lines    != null;
-            assert color    != null;
+            assert argb     != null;
             assert fontName != null;
 
             if (reversed) {
@@ -328,7 +334,7 @@ public final class Slide {
                 this.lines = lines;
             }
 
-            this.color         = color;
+            this.argb          = argb;
             this.fontName      = fontName;
             this.style         = style;
             this.underline     = underline;
@@ -360,7 +366,11 @@ public final class Slide {
                 g.rotate(Math.toRadians(rotation), targetXPosPx + (g.getFontMetrics().stringWidth(line) / 2), targetYPosPx + (strHeight / 2));
 
                 if (i != 0) {
-                    g.setColor(color);
+                    if (argb.color2 != null) { // @NOTE if the second color is set we want to treat it as a gradient
+                        g.setPaint(gradient);
+                    } else {
+                        g.setColor(argb.color1);
+                    }
                     g.drawString(line, (int) targetXPosPx, y += strHeight);
 
                     if (underline) {
@@ -377,7 +387,11 @@ public final class Slide {
                     }
 
                 } else {
-                    g.setColor(color);
+                    if (argb.color2 != null) { // @NOTE if the second color is set we want to treat it as a gradient
+                        g.setPaint(gradient);
+                    } else {
+                        g.setColor(argb.color1);
+                    }
                     g.drawString(line, (int) targetXPosPx, y);
 
                     if (underline) {
@@ -416,6 +430,14 @@ public final class Slide {
             final FontMetrics metrics = g.getFontMetrics(font);
             targetXPosPx = (screenWidth  * (xPosPercentage * 100.0f) / 100.0f) - (targetWidthPx / 2);
             targetYPosPx = (screenHeight * (yPosPercentage * 100.0f) / 100.0f);// - (metrics.getHeight() / 2);
+
+            if (argb.color2 != null) { // @NOTE we do not need to calculate these if we do not have a second color (gradient)
+                gradientTargetX1 = screenWidth  * (argb.x1 * 100.0f) / 100.0f;
+                gradientTargetY1 = screenHeight * (argb.y2 * 100.0f) / 100.0f;
+                gradientTargetX2 = screenWidth  * (argb.x2 * 100.0f) / 100.0f;
+                gradientTargetY2 = screenHeight * (argb.y2 * 100.0f) / 100.0f;
+                gradient = new GradientPaint(gradientTargetX1, gradientTargetY1, argb.color1, gradientTargetX2, gradientTargetY2, argb.color2, argb.cyclic);
+            }
         }
     }
 }

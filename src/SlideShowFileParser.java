@@ -150,9 +150,7 @@ public final class SlideShowFileParser {
         assert lines     != null;
         assert cursor    != null;
 
-        Slide.Argb argb = new Slide.Argb();
-        Color slideColor1 = Color.BLACK;
-        Color slideColor2 = null;
+        final Slide.Argb argb = new Slide.Argb();
         Slide.Audio audio = null; // @NOTE null means play NO audio (which is fine)
         final ArrayList<Slide.Element> elements = new ArrayList<>();
 
@@ -175,21 +173,7 @@ public final class SlideShowFileParser {
                 final String val = line.split("=")[1];
                 switch (key.toUpperCase()) {
                     case "COLOR": {
-                        final String[] gradient = val.split(";"); // @NOTE: Gradient
-                        if (gradient.length == 1) {
-                            argb.color1 = parseArgb(val, cursor);
-                        } else if (gradient.length == 7) {
-                            argb.color1 = parseArgb(gradient[0], cursor);
-                            argb.color2 = parseArgb(gradient[1], cursor);
-
-                            argb.x1 = parseFloat(gradient[2], cursor);
-                            argb.y1 = parseFloat(gradient[3], cursor);
-                            argb.x2 = parseFloat(gradient[4], cursor);
-                            argb.y2 = parseFloat(gradient[5], cursor);
-                            argb.cyclic = parseBoolean(gradient[6], cursor);
-                        } else {
-                            throw new ParseException("Error on line %s: Invalid amount of arguments for gradient color specification!", cursor.val + 1);
-                        }
+                        parsePossibleGradient(argb, val, cursor);
                     } break;
 
                     case "AUDIO": {
@@ -225,6 +209,28 @@ public final class SlideShowFileParser {
 
         // @NOTE EOF
         return new Slide(slideName, argb, audio, elements.toArray(Slide.Element[]::new));  // @NOTE break to main loop
+    }
+
+    private void parsePossibleGradient(final Slide.Argb argb, final String val, final Cursor cursor) throws ParseException {
+        assert argb   != null;
+        assert val    != null;
+        assert cursor != null;
+
+        final String[] gradient = val.split(";"); // @NOTE: Gradient
+        if (gradient.length == 1) {
+            argb.color1 = parseArgb(val, cursor);
+        } else if (gradient.length == 7) {
+            argb.color1 = parseArgb(gradient[0], cursor);
+            argb.color2 = parseArgb(gradient[1], cursor);
+
+            argb.x1 = parseFloat(gradient[2], cursor);
+            argb.y1 = parseFloat(gradient[3], cursor);
+            argb.x2 = parseFloat(gradient[4], cursor);
+            argb.y2 = parseFloat(gradient[5], cursor);
+            argb.cyclic = parseBoolean(gradient[6], cursor);
+        } else {
+            throw new ParseException("Error on line %s: Invalid amount of arguments for gradient color specification!", cursor.val + 1);
+        }
     }
 
     private Color parseArgb(final String str, final Cursor cursor) throws ParseException {
@@ -453,7 +459,7 @@ public final class SlideShowFileParser {
 
         // @NOTE default values
         final ArrayList<String> strings = new ArrayList<>();
-        Color color = Color.BLACK;
+        final Slide.Argb argb = new Slide.Argb();
         float x    = 0.5f;
         float y    = 0.5f;
         float size = 0.5f;
@@ -478,7 +484,7 @@ public final class SlideShowFileParser {
                 if (strings.size() == 0) {
                     strings.add("LINE=?????");
                 }
-                return new Slide.Text(strings.toArray(String[]::new), color, font, style, underline, strikethrough, reversed, x, y, size, rot);
+                return new Slide.Text(strings.toArray(String[]::new), argb, font, style, underline, strikethrough, reversed, x, y, size, rot);
             }
 
             if (isConfig(line)) {
@@ -490,7 +496,7 @@ public final class SlideShowFileParser {
                     } break;
 
                     case "COLOR": {
-                        color = parseArgb(value, cursor);
+                        parsePossibleGradient(argb, value, cursor);
                     } break;
 
                     case "X": {
@@ -546,7 +552,7 @@ public final class SlideShowFileParser {
         if (strings.size() == 0) {
             strings.add("LINE=?????");
         }
-        return new Slide.Text(strings.toArray(String[]::new), color, font, style, underline, strikethrough, reversed, x, y, size, rot);
+        return new Slide.Text(strings.toArray(String[]::new), argb, font, style, underline, strikethrough, reversed, x, y, size, rot);
     }
 
     private String requireSlideElement(final String line, final Cursor cursor) throws ParseException {
