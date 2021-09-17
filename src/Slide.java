@@ -111,8 +111,8 @@ public final class Slide {
         if (argb.color2 != null) { // @NOTE we do not need to calculate these if we do not have a second color (gradient)
             gradientTargetX1 = screenWidth  * (argb.x1 * 100.0f) / 100.0f;
             gradientTargetY1 = screenHeight * (argb.y2 * 100.0f) / 100.0f;
-            gradientTargetX2  = screenWidth  * (argb.x2 * 100.0f) / 100.0f;
-            gradientTargetY2  = screenHeight * (argb.y2 * 100.0f) / 100.0f;
+            gradientTargetX2 = screenWidth  * (argb.x2 * 100.0f) / 100.0f;
+            gradientTargetY2 = screenHeight * (argb.y2 * 100.0f) / 100.0f;
         }
     }
 
