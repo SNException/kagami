@@ -180,46 +180,22 @@ public final class Main {
                 handleParseErrorLambda.call(ex);
             }
 
-            final Thread thread = new Thread(() -> {
-                // @NOTE I know that there is the PathWatcher Api in Java. However, that API is just nuts.
-                // In fact it is so crazy that I rather do this stupid poll solution.
-                long last = slideshowFile.lastModified();
-                while (true) {
-                    long now = slideshowFile.lastModified();
-                    if (now > last) {
-                        try {
-                            final Slide[] slideshow = parser.parseSlides();
-                            display.clearMessage();
-                            display.newSlideShow(slideshow);
-                        } catch (final SlideShowFileParser.ParseException ex) {
-                            handleParseErrorLambda.call(ex);
-                        } finally {
-                            last = now;
-                        }
-                    }
-
+            final Thread hotLoader = new Thread(() -> {
+                new FileModWatcher(Path.of(slideshowFile.getAbsolutePath()), () -> {
                     try {
-                        Thread.yield();
-                        //
-                        // @TODO Make poll rate configurable?
-                        //
-
-                        //
-                        // @TODO There should be a program argument (?) to turn off hotloading.
-                        // This would be useful when you are done making frequent changes to your presentation.
-                        // Would be system resource waste to have this poll during presentation. Perhaps disable
-                        // hotloading when we are in 'presentation mode' (fullscreen).
-                        //
-                        Thread.sleep(250, 0);
-                    } catch (final InterruptedException ex) {
-                        assert false : "Not supposed to interrupt this thread!";
+                        final Slide[] slideshow = parser.parseSlides();
+                        display.clearMessage();
+                        display.newSlideShow(slideshow);
+                    } catch (final SlideShowFileParser.ParseException ex) {
+                        handleParseErrorLambda.call(ex);
                     }
-                }
+                    return (Void) null;
+                }).start();
             });
-            thread.setName("hotloader_thread");
-            thread.setPriority(Thread.MIN_PRIORITY);
-            thread.setDaemon(true);
-            thread.start();
+            hotLoader.setName("hotloader_thread");
+            hotLoader.setPriority(Thread.MIN_PRIORITY);
+            hotLoader.setDaemon(true);
+            hotLoader.start();
         });
     }
 
