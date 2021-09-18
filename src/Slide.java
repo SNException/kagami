@@ -420,8 +420,6 @@ public final class Slide {
 
             final var oldState = g.getTransform();
 
-            // @NOTE we split by the actual char sequence of '\n' (backslash followed by n) and not an actual line feed.
-            // @TODO we probably also want automatic wrapping (insertion of \n) when a line hits the end of the frame
             final int strHeight = g.getFontMetrics().getHeight();
             float y = targetYPosPx;
             for (int i = 0, l = lines.length; i < l; ++i) {
