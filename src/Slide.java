@@ -110,10 +110,9 @@ public final class Slide {
 
         if (argb.color2 != null) { // @NOTE we do not need to calculate these if we do not have a second color (gradient)
             gradientTargetX1 = screenWidth  * (argb.x1 * 100.0f) / 100.0f;
-            gradientTargetY1 = screenHeight * (argb.y2 * 100.0f) / 100.0f;
+            gradientTargetY1 = screenHeight * (argb.y1 * 100.0f) / 100.0f;
             gradientTargetX2 = screenWidth  * (argb.x2 * 100.0f) / 100.0f;
             gradientTargetY2 = screenHeight * (argb.y2 * 100.0f) / 100.0f;
-            // @TODO When I pass y values this does not chage the gradient?! However when I pass it directly here, than it does? What is going on...
             gradient         = new GradientPaint(gradientTargetX1, gradientTargetY1, argb.color1, gradientTargetX2, gradientTargetY2, argb.color2, argb.cyclic);
         }
     }
@@ -250,7 +249,7 @@ public final class Slide {
 
             if (color.color2 != null) { // @NOTE we do not need to calculate these if we do not have a second color (gradient)
                 gradientTargetX1 = screenWidth  * (color.x1 * 100.0f) / 100.0f;
-                gradientTargetY1 = screenHeight * (color.y2 * 100.0f) / 100.0f;
+                gradientTargetY1 = screenHeight * (color.y1 * 100.0f) / 100.0f;
                 gradientTargetX2 = screenWidth  * (color.x2 * 100.0f) / 100.0f;
                 gradientTargetY2 = screenHeight * (color.y2 * 100.0f) / 100.0f;
                 gradient         = new GradientPaint(gradientTargetX1, gradientTargetY1, color.color1, gradientTargetX2, gradientTargetY2, color.color2, color.cyclic);
@@ -258,7 +257,7 @@ public final class Slide {
 
             if (borderColor.color2 != null) { // @NOTE we do not need to calculate these if we do not have a second color (gradient)
                 borderGradientTargetX1 = screenWidth  * (borderColor.x1 * 100.0f) / 100.0f;
-                borderGradientTargetY1 = screenHeight * (borderColor.y2 * 100.0f) / 100.0f;
+                borderGradientTargetY1 = screenHeight * (borderColor.y1 * 100.0f) / 100.0f;
                 borderGradientTargetX2 = screenWidth  * (borderColor.x2 * 100.0f) / 100.0f;
                 borderGradientTargetY2 = screenHeight * (borderColor.y2 * 100.0f) / 100.0f;
                 borderGradient         = new GradientPaint(borderGradientTargetX1, borderGradientTargetY1, borderColor.color1, borderGradientTargetX2, borderGradientTargetY2, borderColor.color2, borderColor.cyclic);
@@ -349,7 +348,7 @@ public final class Slide {
 
             if (borderColor.color2 != null) { // @NOTE we do not need to calculate these if we do not have a second color (gradient)
                 borderGradientTargetX1 = screenWidth  * (borderColor.x1 * 100.0f) / 100.0f;
-                borderGradientTargetY1 = screenHeight * (borderColor.y2 * 100.0f) / 100.0f;
+                borderGradientTargetY1 = screenHeight * (borderColor.y1 * 100.0f) / 100.0f;
                 borderGradientTargetX2 = screenWidth  * (borderColor.x2 * 100.0f) / 100.0f;
                 borderGradientTargetY2 = screenHeight * (borderColor.y2 * 100.0f) / 100.0f;
                 borderGradient         = new GradientPaint(borderGradientTargetX1, borderGradientTargetY1, borderColor.color1, borderGradientTargetX2, borderGradientTargetY2, borderColor.color2, borderColor.cyclic);
@@ -498,7 +497,7 @@ public final class Slide {
 
             if (argb.color2 != null) { // @NOTE we do not need to calculate these if we do not have a second color (gradient)
                 gradientTargetX1 = screenWidth  * (argb.x1 * 100.0f) / 100.0f;
-                gradientTargetY1 = screenHeight * (argb.y2 * 100.0f) / 100.0f;
+                gradientTargetY1 = screenHeight * (argb.y1 * 100.0f) / 100.0f;
                 gradientTargetX2 = screenWidth  * (argb.x2 * 100.0f) / 100.0f;
                 gradientTargetY2 = screenHeight * (argb.y2 * 100.0f) / 100.0f;
                 gradient = new GradientPaint(gradientTargetX1, gradientTargetY1, argb.color1, gradientTargetX2, gradientTargetY2, argb.color2, argb.cyclic);
