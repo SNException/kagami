@@ -258,7 +258,7 @@ public final class Main {
         }
 
         if (args.length == 0) {
-            final FileDialog chooser = new FileDialog((java.awt.Frame) null, "Kagami - Choose slideshow", FileDialog.LOAD);
+            final FileDialog chooser = new FileDialog((java.awt.Frame) null, "Kagami " + VERSION + " - Choose slideshow", FileDialog.LOAD);
             chooser.setDirectory(System.getProperty("user.dir"));
             chooser.setMultipleMode(false);
             chooser.setFilenameFilter((dir, file) -> file.endsWith(".kagami"));
