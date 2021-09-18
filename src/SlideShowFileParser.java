@@ -10,6 +10,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.logging.Level;
 import javax.imageio.ImageIO;
 
@@ -120,7 +121,8 @@ public final class SlideShowFileParser {
         if (!success) {
             throw new ParseException("Failed to read '%s'\n", file.getAbsolutePath());
         }
-        final ArrayList<Slide> slideshow = new ArrayList<>();
+        final ArrayList<Slide> slideshow   = new ArrayList<>();
+        final ArrayList<String> slideNames = new ArrayList<>();
 
         final String[] lines = fileContent.toString().split("\n");
         final Cursor cursor = new Cursor(lines.length - 1);
@@ -138,11 +140,21 @@ public final class SlideShowFileParser {
             }
 
             final String slideName = requireSlideDecl(line, cursor);
+            slideNames.add(slideName);
             final Slide slide = parseSlideDecl(slideName, lines, cursor);
             slideshow.add(slide);
         }
 
+        errorOnDuplicateSlideNames(slideNames);
+
         return slideshow.toArray(Slide[]::new);
+    }
+
+    private void errorOnDuplicateSlideNames(final ArrayList<String> slideNames) throws ParseException {
+        final HashSet<String> set = new HashSet<>(slideNames);
+        if (set.size() < slideNames.size()) {
+            throw new ParseException("You have duplicate slide names in your slideshow which is illegal!");
+        }
     }
 
     private Slide parseSlideDecl(final String slideName, final String[] lines, final Cursor cursor) throws ParseException {
