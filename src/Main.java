@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 
 public final class Main {
 
-    public static final String VERSION = "v0.2.0";
+    public static final String VERSION = "v0.3.0";
 
     public static final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
@@ -148,58 +148,6 @@ public final class Main {
         return ManagementFactory.getRuntimeMXBean().getInputArguments().contains("-ea");
     }
 
-    public static void main(final String[] args) {
-        initLogging();
-
-        if (isDebugMode()) {
-            logger.log(Level.INFO, "Running with assertions enabled!");
-        }
-
-        // @NOTE
-        // As you know loading classes into memory happens automatically. However,
-        // it is done when the class is referenced for the very first time (although that is JVM dependent). Since code is usally scattered across
-        // different files it is hard to tell when exactly that happens. And not only is it hard to tell it can also happen at times
-        // where it is bad. For example, imagine a user clicking a button which for the very first time loads a class which contains the 'button run code'.
-        // This will cause lag for user. And that latency might be severe depending on how much stuff has to be loaded. For all we know there can be
-        // huge amounts of asset loading code in initializer blocks.
-        // Anyway, my point is that I happily sacrifice some startup time so that we can have a more predictable and performent runtime.
-        loadAllClassesIntoMemory();
-
-        // @NOTE
-        // We do this after loading every class into memory. That is because I want to 'ensure' that
-        // no other static initializer code (inside external dependencies for example) resets my UncaughtExceptionHandler.
-        // This could still happen in function calls but I guess it is less likey. Anyway if a library actually does
-        // set the UncaughtExceptionHandler we should strongly reconsider if using that library is a good idea to begin with.
-        initUncaughtExceptionHandler();
-
-        // @NOTE Let's try to collect some garbage we have made so far
-        Runtime.getRuntime().gc();
-        Runtime.getRuntime().runFinalization();
-
-        try {
-            javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager.getSystemLookAndFeelClassName());
-        } catch (final Exception ex) {
-            logger.log(Level.INFO, "Failed to set system look and feel.", ex);
-        }
-
-        if (args.length == 0) {
-            final FileDialog chooser = new FileDialog((java.awt.Frame) null, "Kagami - Choose slideshow", FileDialog.LOAD);
-            chooser.setDirectory(System.getProperty("user.dir"));
-            chooser.setMultipleMode(false);
-            chooser.setFilenameFilter((dir, file) -> file.endsWith(".kagami"));
-            chooser.setLocation(GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint());
-            chooser.setVisible(true);
-            final String file = chooser.getFile();
-            if (file != null) {
-                launch(new File(chooser.getDirectory() + file));
-            } else {
-                System.exit(0);
-            }
-        } else {
-            launch(new File(args[0]));
-        }
-    }
-
     private static void launch(final File slideshowFile) {
         EventQueue.invokeLater(() -> {
             final Display display = new Display(slideshowFile.getName());
@@ -273,5 +221,57 @@ public final class Main {
             thread.setDaemon(true);
             thread.start();
         });
+    }
+
+    public static void main(final String[] args) {
+        initLogging();
+
+        if (isDebugMode()) {
+            logger.log(Level.INFO, "Running with assertions enabled!");
+        }
+
+        // @NOTE
+        // As you know loading classes into memory happens automatically. However,
+        // it is done when the class is referenced for the very first time (although that is JVM dependent). Since code is usally scattered across
+        // different files it is hard to tell when exactly that happens. And not only is it hard to tell it can also happen at times
+        // where it is bad. For example, imagine a user clicking a button which for the very first time loads a class which contains the 'button run code'.
+        // This will cause lag for user. And that latency might be severe depending on how much stuff has to be loaded. For all we know there can be
+        // huge amounts of asset loading code in initializer blocks.
+        // Anyway, my point is that I happily sacrifice some startup time so that we can have a more predictable and performent runtime.
+        loadAllClassesIntoMemory();
+
+        // @NOTE
+        // We do this after loading every class into memory. That is because I want to 'ensure' that
+        // no other static initializer code (inside external dependencies for example) resets my UncaughtExceptionHandler.
+        // This could still happen in function calls but I guess it is less likey. Anyway if a library actually does
+        // set the UncaughtExceptionHandler we should strongly reconsider if using that library is a good idea to begin with.
+        initUncaughtExceptionHandler();
+
+        // @NOTE Let's try to collect some garbage we have made so far
+        Runtime.getRuntime().gc();
+        Runtime.getRuntime().runFinalization();
+
+        try {
+            javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager.getSystemLookAndFeelClassName());
+        } catch (final Exception ex) {
+            logger.log(Level.INFO, "Failed to set system look and feel.", ex);
+        }
+
+        if (args.length == 0) {
+            final FileDialog chooser = new FileDialog((java.awt.Frame) null, "Kagami - Choose slideshow", FileDialog.LOAD);
+            chooser.setDirectory(System.getProperty("user.dir"));
+            chooser.setMultipleMode(false);
+            chooser.setFilenameFilter((dir, file) -> file.endsWith(".kagami"));
+            chooser.setLocation(GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint());
+            chooser.setVisible(true);
+            final String file = chooser.getFile();
+            if (file != null) {
+                launch(new File(chooser.getDirectory() + file));
+            } else {
+                System.exit(0);
+            }
+        } else {
+            launch(new File(args[0]));
+        }
     }
 }
