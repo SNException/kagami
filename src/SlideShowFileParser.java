@@ -387,7 +387,7 @@ public final class SlideShowFileParser {
         float alpha = 1;
         int rot    = 0;
         float borderSize   = 0;
-        Color borderColor  = Color.BLACK;
+        final Slide.Argb borderColor = new Slide.Argb();
 
         while (cursor.advance()) {
             final String line = lines[cursor.val].strip();
@@ -440,7 +440,7 @@ public final class SlideShowFileParser {
                     } break;
 
                     case "BORDERCOLOR": {
-                        borderColor = parseArgb(value, cursor);
+                        parsePossibleGradient(borderColor, value, cursor);
                     } break;
 
                     default: {
