@@ -361,36 +361,7 @@ public final class Display {
                         canvas.setBounds(0, 0, mainPanel.getWidth(), mainPanel.getHeight());
                     } else {
                         // @TODO: I think there are still issues when an aspect ratio where y (h) is greater than x (w) is passed
-                        aspect_ratio: {
-                            float w = mainPanel.getWidth();
-                            float h = mainPanel.getHeight();
-                            while (true) {
-                                currentAspectRatio = w / h;
-
-                                final float threshold = 0.00001f; // @NOTE Since we are dealing with float values we can not check for exact (==) values.
-                                if (currentAspectRatio < (targetAspectRatio - threshold)) {  // @NOTE height is now bigger than width hence we have to subtract height as long as it takes to resolve thatspectRatio - threshold) {
-                                     h -= 1;
-                                     continue;
-                                }
-
-                                if (w <= h || (currentAspectRatio >= (targetAspectRatio - threshold) && currentAspectRatio <= (targetAspectRatio + threshold))) { // @NOTE threshold (4/3)
-                                    Main.logger.log(Level.INFO, String.format("Current aspect ratio is %s", currentAspectRatio));
-                                    float xScale = mainPanel.getWidth()  / w;
-                                    float yScale = mainPanel.getHeight() / h;
-                                    if (xScale < 1) xScale = 1;
-                                    if (yScale < 1) yScale = 1;
-                                    if (xScale > yScale) xScale = yScale;
-                                    if (yScale > xScale) yScale = xScale;
-
-                                    final float xCenter = (mainPanel.getWidth()  - (w * xScale)) / 2;
-                                    final float yCenter = (mainPanel.getHeight() - (h * yScale)) / 2;
-                                    canvas.setBounds((int) xCenter, (int) yCenter, (int) w, (int) h);
-                                    break;
-                                }
-
-                                w  -= 1;
-                            }
-                        }
+                        calcAndApplyAspectRatio();
                     }
 
                     for (final Slide slide : slideshow) {
@@ -407,47 +378,7 @@ public final class Display {
                 if (!msg) {
                     slideshow[slideIndex].render(g);
                 } else {
-                    g.setColor(new Color(50, 0, 0));
-                    g.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
-
-                    // @TODO: Heavily copy pasted from Slide.Text
-                    final float sizePercentage = 0.9f;
-                    final float targetWidthPx = canvas.getWidth() * (sizePercentage * 100.0f) / 100.0f;
-                    float fontSize = 0.0f;
-                    final Font font = new Font("Consolas", Font.BOLD, (int) fontSize);
-                    while (true) {
-                        final FontMetrics metrics = g.getFontMetrics(font.deriveFont(fontSize));
-                        float currentWidthPx = metrics.stringWidth(message);
-                        if (message.split("\n").length == 0) {
-                            currentWidthPx = metrics.stringWidth(message);
-                        } else {
-                            currentWidthPx = metrics.stringWidth(message.split("\n")[0]); // @NOTE only use the first line
-                        }
-                        assert currentWidthPx != -1;
-                        if (currentWidthPx >= targetWidthPx) {
-                            break;
-                        }
-                        fontSize += 0.20f;
-                    }
-
-                    final FontMetrics metrics = g.getFontMetrics(font);
-                    final float targetXPosPx = (canvas.getWidth()  * (0.5f * 100.0f) / 100.0f) - (targetWidthPx / 2);
-                    final float targetYPosPx = (canvas.getHeight() * (0.5f * 100.0f) / 100.0f);// - (metrics.getHeight() / 2);
-
-                    g.setFont(font.deriveFont(fontSize));
-                    g.setColor(Color.WHITE);
-
-                    final String[] lines = message.split("\n"); // @NOTE split by the actual line feed byte
-                    final int strHeight = g.getFontMetrics().getHeight();
-                    float y = targetYPosPx;
-                    for (int i = 0, l = lines.length; i < l; ++i) {
-                        final String line = lines[i];
-                        if (i != 0) {
-                            g.drawString(line, (int) targetXPosPx, y += strHeight);
-                        } else {
-                            g.drawString(line, (int) targetXPosPx, y);
-                        }
-                    }
+                    renderMessage(g);
                 }
 
                 renderDebugInformation(g);
@@ -469,6 +400,81 @@ public final class Display {
             Toolkit.getDefaultToolkit().sync();
 
         } while (backBuffers.contentsLost());
+    }
+
+    private void calcAndApplyAspectRatio() {
+        float w = mainPanel.getWidth();
+        float h = mainPanel.getHeight();
+        while (true) {
+            currentAspectRatio = w / h;
+
+            final float threshold = 0.00001f; // @NOTE Since we are dealing with float values we can not check for exact (==) values.
+            if (currentAspectRatio < (targetAspectRatio - threshold)) {  // @NOTE height is now bigger than width hence we have to subtract height as long as it takes to resolve thatspectRatio - threshold) {
+                 h -= 1;
+                 continue;
+            }
+
+            if (w <= h || (currentAspectRatio >= (targetAspectRatio - threshold) && currentAspectRatio <= (targetAspectRatio + threshold))) { // @NOTE threshold (4/3)
+                Main.logger.log(Level.INFO, String.format("Current aspect ratio is %s", currentAspectRatio));
+                float xScale = mainPanel.getWidth()  / w;
+                float yScale = mainPanel.getHeight() / h;
+                if (xScale < 1) xScale = 1;
+                if (yScale < 1) yScale = 1;
+                if (xScale > yScale) xScale = yScale;
+                if (yScale > xScale) yScale = xScale;
+
+                final float xCenter = (mainPanel.getWidth()  - (w * xScale)) / 2;
+                final float yCenter = (mainPanel.getHeight() - (h * yScale)) / 2;
+                canvas.setBounds((int) xCenter, (int) yCenter, (int) w, (int) h);
+                break;
+            }
+            w  -= 1;
+        }
+    }
+
+    private void renderMessage(final Graphics2D g) {
+        g.setColor(new Color(50, 0, 0));
+        g.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+
+        // @TODO: Heavily copy pasted from Slide.Text
+        final float sizePercentage = 0.9f;
+        final float targetWidthPx = canvas.getWidth() * (sizePercentage * 100.0f) / 100.0f;
+        float fontSize = 0.0f;
+        final Font font = new Font("Consolas", Font.BOLD, (int) fontSize);
+        while (true) {
+            final FontMetrics metrics = g.getFontMetrics(font.deriveFont(fontSize));
+            float currentWidthPx = metrics.stringWidth(message);
+            if (message.split("\n").length == 0) {
+                currentWidthPx = metrics.stringWidth(message);
+            } else {
+                currentWidthPx = metrics.stringWidth(message.split("\n")[0]); // @NOTE only use the first line
+            }
+            assert currentWidthPx != -1;
+            if (currentWidthPx >= targetWidthPx) {
+                break;
+            }
+            fontSize += 0.20f;
+        }
+
+        final FontMetrics metrics = g.getFontMetrics(font);
+        final float targetXPosPx = (canvas.getWidth()  * (0.5f * 100.0f) / 100.0f) - (targetWidthPx / 2);
+        final float targetYPosPx = (canvas.getHeight() * (0.5f * 100.0f) / 100.0f);// - (metrics.getHeight() / 2);
+
+        g.setFont(font.deriveFont(fontSize));
+        g.setColor(Color.WHITE);
+
+        final String[] lines = message.split("\n"); // @NOTE split by the actual line feed byte
+        final int strHeight = g.getFontMetrics().getHeight();
+        float y = targetYPosPx;
+        for (int i = 0, l = lines.length; i < l; ++i) {
+            final String line = lines[i];
+            if (i != 0) {
+                g.drawString(line, (int) targetXPosPx, y += strHeight);
+            } else {
+                g.drawString(line, (int) targetXPosPx, y);
+            }
+        }
+
     }
 
     private void renderDebugInformation(final Graphics2D g) {
