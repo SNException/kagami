@@ -304,14 +304,14 @@ public final class SlideShowFileParser {
         assert type   != null;
 
         // @NOTE default values
-        Color color = Color.BLACK;
+        final Slide.Argb color = new Slide.Argb();
         float x    = 0.5f;
         float y    = 0.5f;
         float w    = 0.5f;
         float h    = 0.5f;
         int rot    = 0;
         float borderSize   = 0;
-        Color borderColor  = Color.BLACK;
+        final Slide.Argb borderColor = new Slide.Argb();
 
         while (cursor.advance()) {
             final String line = lines[cursor.val].strip();
@@ -332,7 +332,7 @@ public final class SlideShowFileParser {
                 final String value = line.split("=")[1];
                 switch (key.toUpperCase()) {
                     case "COLOR": {
-                        color = parseArgb(value, cursor);
+                        parsePossibleGradient(color, value, cursor);
                     } break;
 
                     case "X": {
@@ -360,7 +360,7 @@ public final class SlideShowFileParser {
                     } break;
 
                     case "BORDERCOLOR": {
-                        borderColor = parseArgb(value, cursor);
+                        parsePossibleGradient(borderColor, value, cursor);
                     } break;
 
                     default: {

@@ -113,7 +113,8 @@ public final class Slide {
             gradientTargetY1 = screenHeight * (argb.y2 * 100.0f) / 100.0f;
             gradientTargetX2 = screenWidth  * (argb.x2 * 100.0f) / 100.0f;
             gradientTargetY2 = screenHeight * (argb.y2 * 100.0f) / 100.0f;
-            gradient = new GradientPaint(gradientTargetX1, gradientTargetY1, argb.color1, gradientTargetX2, gradientTargetY2, argb.color2, argb.cyclic);
+            // @TODO When I pass y values this does not chage the gradient?! However when I pass it directly here, than it does? What is going on...
+            gradient         = new GradientPaint(gradientTargetX1, gradientTargetY1, argb.color1, gradientTargetX2, gradientTargetY2, argb.color2, argb.cyclic);
         }
     }
 
@@ -132,7 +133,7 @@ public final class Slide {
 
         private final Type type;
 
-        private final Color color;
+        private final Argb color;
 
         private final float xPosPercentage;
         private final float yPosPercentage;
@@ -141,7 +142,7 @@ public final class Slide {
         private final float heightPercentage;
         private final float borderSizePercentage;
         private final float rotation;
-        private final Color borderColor;
+        private final Argb borderColor;
 
         private float targetXPosPx      = 0;
         private float targetYPosPx      = 0;
@@ -149,7 +150,19 @@ public final class Slide {
         private float targetHeightPx    = 0;
         private float targetBorderPx    = 0;
 
-        public Form(final Type type, final Color color, final float xPosPercentage, final float yPosPercentage, final float widthPercentage, final float heightPercentage, final float rotation, final float borderSizePercentage, final Color borderColor) {
+        private GradientPaint gradient;
+        private float gradientTargetX1;
+        private float gradientTargetY1;
+        private float gradientTargetX2;
+        private float gradientTargetY2;
+
+        private GradientPaint borderGradient;
+        private float borderGradientTargetX1;
+        private float borderGradientTargetY1;
+        private float borderGradientTargetX2;
+        private float borderGradientTargetY2;
+
+        public Form(final Type type, final Argb color, final float xPosPercentage, final float yPosPercentage, final float widthPercentage, final float heightPercentage, final float rotation, final float borderSizePercentage, final Argb borderColor) {
             assert type  != null;
             assert color != null;
 
@@ -179,11 +192,20 @@ public final class Slide {
                 case RECT: {
                     final Graphics2D g2 = (Graphics2D) g.create();
 
-                    g2.setColor(color);
+                    if (color.color2 != null) { // @NOTE if the second color is set we want to treat it as a gradient
+                        g2.setPaint(gradient);
+                    } else {
+                        g2.setColor(color.color1);
+                    }
+
                     g2.rotate(Math.toRadians(rotation), targetXPosPx + (targetWidthPx / 2), targetYPosPx + (targetHeightPx / 2));
                     g2.fillRect((int) targetXPosPx, (int) targetYPosPx, (int) targetWidthPx, (int) targetHeightPx);
 
-                    g2.setColor(borderColor);
+                    if (borderColor.color2 != null) { // @NOTE if the second color is set we want to treat it as a gradient
+                        g2.setPaint(borderGradient);
+                    } else {
+                        g2.setColor(borderColor.color1);
+                    }
                     g2.setStroke(new BasicStroke(targetBorderPx));
                     g2.drawRect((int) targetXPosPx, (int) targetYPosPx, (int) targetWidthPx, (int) targetHeightPx);
                     g2.dispose();
@@ -192,11 +214,20 @@ public final class Slide {
                 case OVAL: {
                     final Graphics2D g2 = (Graphics2D) g.create();
 
-                    g2.setColor(color);
+                    if (color.color2 != null) { // @NOTE if the second color is set we want to treat it as a gradient
+                        g2.setPaint(gradient);
+                    } else {
+                        g2.setColor(color.color1);
+                    }
+
                     g2.rotate(Math.toRadians(rotation), targetXPosPx + (targetWidthPx / 2), targetYPosPx + (targetHeightPx / 2));
                     g2.fillOval((int) targetXPosPx, (int) targetYPosPx, (int) targetWidthPx, (int) targetHeightPx);
 
-                    g2.setColor(borderColor);
+                    if (borderColor.color2 != null) { // @NOTE if the second color is set we want to treat it as a gradient
+                        g2.setPaint(borderGradient);
+                    } else {
+                        g2.setColor(borderColor.color1);
+                    }
                     g2.setStroke(new BasicStroke(targetBorderPx));
                     g2.drawOval((int) targetXPosPx, (int) targetYPosPx, (int) targetWidthPx, (int) targetHeightPx);
 
@@ -216,6 +247,22 @@ public final class Slide {
             targetXPosPx     = (screenWidth  * (xPosPercentage       * 100.0f) / 100.0f) - (targetWidthPx / 2);
             targetYPosPx     = (screenHeight * (yPosPercentage       * 100.0f) / 100.0f) - (targetHeightPx / 2);
             targetBorderPx   = targetWidthPx * (borderSizePercentage * 100.0f) / 100.0f;
+
+            if (color.color2 != null) { // @NOTE we do not need to calculate these if we do not have a second color (gradient)
+                gradientTargetX1 = screenWidth  * (color.x1 * 100.0f) / 100.0f;
+                gradientTargetY1 = screenHeight * (color.y2 * 100.0f) / 100.0f;
+                gradientTargetX2 = screenWidth  * (color.x2 * 100.0f) / 100.0f;
+                gradientTargetY2 = screenHeight * (color.y2 * 100.0f) / 100.0f;
+                gradient         = new GradientPaint(gradientTargetX1, gradientTargetY1, color.color1, gradientTargetX2, gradientTargetY2, color.color2, color.cyclic);
+            }
+
+            if (borderColor.color2 != null) { // @NOTE we do not need to calculate these if we do not have a second color (gradient)
+                borderGradientTargetX1 = screenWidth  * (borderColor.x1 * 100.0f) / 100.0f;
+                borderGradientTargetY1 = screenHeight * (borderColor.y2 * 100.0f) / 100.0f;
+                borderGradientTargetX2 = screenWidth  * (borderColor.x2 * 100.0f) / 100.0f;
+                borderGradientTargetY2 = screenHeight * (borderColor.y2 * 100.0f) / 100.0f;
+                borderGradient         = new GradientPaint(borderGradientTargetX1, borderGradientTargetY1, borderColor.color1, borderGradientTargetX2, borderGradientTargetY2, borderColor.color2, borderColor.cyclic);
+            }
         }
     }
 
