@@ -24,7 +24,10 @@ public final class FileModWatcher {
     }
 
     public synchronized void start() {
-        if (polling) return;
+        if (polling) {
+            assert false : "You already started the watcher. Need to call stop() first!";
+            return;
+        }
 
         polling = true;
 
