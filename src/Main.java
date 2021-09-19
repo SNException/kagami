@@ -180,7 +180,7 @@ public final class Main {
                 handleParseErrorLambda.call(ex);
             }
 
-            new FileModWatcher(Path.of(slideshowFile.getAbsolutePath()), () -> {
+            final FileModWatcher watcher = new FileModWatcher(Path.of(slideshowFile.getAbsolutePath()), () -> {
                 try {
                     final Slide[] slideshow = parser.parseSlides();
                     display.clearMessage();
@@ -189,7 +189,8 @@ public final class Main {
                     handleParseErrorLambda.call(ex);
                 }
                 return (Void) null;
-            }).start();
+            });
+            watcher.start();
         });
     }
 

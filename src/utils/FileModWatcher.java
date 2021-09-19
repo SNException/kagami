@@ -21,6 +21,12 @@ public final class FileModWatcher {
 
         this.interestingFile = interestingFile;
         this.callback        = callback;
+    }
+
+    public synchronized void start() {
+        if (polling) return;
+
+        polling = true;
 
         try {
             watcher = FileSystems.getDefault().newWatchService();
@@ -30,12 +36,6 @@ public final class FileModWatcher {
         } catch (final UnsupportedOperationException ex) {
             Main.logger.log(Level.WARNING, "Event based file watching is not supported on this platform.");
         }
-    }
-
-    public synchronized void start() {
-        if (polling) return;
-
-        polling = true;
 
         if (watcher != null) {
             smartPolling();
