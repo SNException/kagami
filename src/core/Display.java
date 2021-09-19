@@ -351,6 +351,8 @@ public final class Display {
                 } catch (final java.io.IOException ex) {
                     Main.logger.log(Level.SEVERE, ex.getMessage(), ex);
                     exportedAllSlides = false;
+                    break; // @NOTE no point in an incomplete slideshow
+                    // @TODO message box so the user knows the export has failed
                 }
             }
             if (exportedAllSlides) {
