@@ -13,7 +13,7 @@ public final class FileModWatcher {
     private final Path interestingFile;
     private final Lambdas.Nullary<?> callback;
     private WatchService watcher;
-    private volatile boolean stupidPolling = false;
+    private volatile boolean polling = false;
 
     public FileModWatcher(final Path interestingFile, final Lambdas.Nullary<?> callback) {
         assert interestingFile != null;
@@ -33,33 +33,35 @@ public final class FileModWatcher {
     }
 
     public synchronized void start() {
+        polling = true;
+
         if (watcher != null) {
-            smartEventBasedPolling();
+            smartPolling();
         } else { // @NOTE platform does not support event based file watching
             stupidPolling();
         }
     }
 
     public synchronized void stop() {
+        polling = false;
+
         if (watcher != null) {
             try {
                 watcher.close();
             } catch (final IOException ex) {
                 Main.logger.log(Level.INFO, ex.getMessage(), ex);
             }
-        } else {
-            stupidPolling = false;
         }
     }
 
-    private synchronized void smartEventBasedPolling() {
+    private synchronized void smartPolling() {
         try {
             Path dir = interestingFile.getParent();
             if (dir == null) { // @NOTE no parent
                 dir = Path.of(System.getProperty("user.dir"));
             }
             dir.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
-            for (;;) {
+            while (polling) {
 
                 WatchKey key = null;
                 try {
@@ -105,10 +107,8 @@ public final class FileModWatcher {
     }
 
     private synchronized void stupidPolling() {
-        stupidPolling = true;
-
         long last = interestingFile.toFile().lastModified();
-        while (stupidPolling) {
+        while (polling) {
             long now = interestingFile.toFile().lastModified();
             if (now > last) {
                 try {
