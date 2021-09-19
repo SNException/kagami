@@ -233,6 +233,7 @@ public final class Main {
             chooser.setDirectory(System.getProperty("user.dir"));
             chooser.setMultipleMode(false);
             chooser.setFilenameFilter((dir, file) -> file.endsWith(".kagami"));
+            chooser.setFile("*.kagami");
             chooser.setLocation(GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint());
             chooser.setVisible(true);
             final String file = chooser.getFile();
