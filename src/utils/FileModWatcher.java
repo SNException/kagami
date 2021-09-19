@@ -134,7 +134,7 @@ public final class FileModWatcher {
                     }
                 }
             }
-        }, "file_mod_watcher_smart_thread");
+        }, "file_mod_watcher_stupid_thread");
 
         thread.setDaemon(true);
         thread.setPriority(Thread.MIN_PRIORITY);
