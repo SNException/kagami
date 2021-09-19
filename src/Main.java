@@ -180,22 +180,16 @@ public final class Main {
                 handleParseErrorLambda.call(ex);
             }
 
-            final Thread hotLoader = new Thread(() -> {
-                new FileModWatcher(Path.of(slideshowFile.getAbsolutePath()), () -> {
-                    try {
-                        final Slide[] slideshow = parser.parseSlides();
-                        display.clearMessage();
-                        display.newSlideShow(slideshow);
-                    } catch (final SlideShowFileParser.ParseException ex) {
-                        handleParseErrorLambda.call(ex);
-                    }
-                    return (Void) null;
-                }).start();
-            });
-            hotLoader.setName("hotloader_thread");
-            hotLoader.setPriority(Thread.MIN_PRIORITY);
-            hotLoader.setDaemon(true);
-            hotLoader.start();
+            new FileModWatcher(Path.of(slideshowFile.getAbsolutePath()), () -> {
+                try {
+                    final Slide[] slideshow = parser.parseSlides();
+                    display.clearMessage();
+                    display.newSlideShow(slideshow);
+                } catch (final SlideShowFileParser.ParseException ex) {
+                    handleParseErrorLambda.call(ex);
+                }
+                return (Void) null;
+            }).start();
         });
     }
 
