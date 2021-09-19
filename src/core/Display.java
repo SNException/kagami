@@ -303,6 +303,8 @@ public final class Display {
             // @NOTE presentation mode
             isMousePointerActive = false;
 
+            debugLevel = DebugLevel.NONE;
+
             final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
             if (frame.isUndecorated()) {
                 // @NOTE windowed
