@@ -331,7 +331,15 @@ public final class Display {
                 createGraphics();
             }
         } else if (inputHandler.isKeyDown(KeyEvent.VK_S)) {
+
+            //
+            // @TODO: This needs to be cleaned up!
+            //
+
             Main.logger.log(Level.INFO, "Requested slideshow export.");
+            boolean exportedAllSlides = true;
+
+            new java.io.File("export").mkdir();
 
             for (int i = 0; i < slideshow.length; ++i) {
                 final BufferedImage slideImage = new BufferedImage(canvas.getWidth(), canvas.getHeight(), BufferedImage.TYPE_INT_ARGB);
@@ -339,9 +347,37 @@ public final class Display {
                 g.setRenderingHints(renderingHints);
                 slideshow[i].render(g);
                 try {
-                    javax.imageio.ImageIO.write(slideImage, "png", new java.io.File("slide_" + (i + 1) + ".png"));
+                    javax.imageio.ImageIO.write(slideImage, "png", new java.io.File("export/slide_" + (i + 1) + ".png"));
                 } catch (final java.io.IOException ex) {
                     Main.logger.log(Level.SEVERE, ex.getMessage(), ex);
+                    exportedAllSlides = false;
+                }
+            }
+            if (exportedAllSlides) {
+                final FResult<java.io.FileOutputStream> handleResult = SFile.openFileForWriting("export/slideshow.html");
+                if (handleResult.success) {
+                    final java.io.FileOutputStream handle = handleResult.data;
+                    final StringBuilder htmlImageTags = new StringBuilder();
+                    for (int i = 0; i < slideshow.length; ++i) {
+                        final String slideName = "slide_" + (i + 1) + ".png";
+                        htmlImageTags.append("<div>\n");
+                        htmlImageTags.append(String.format("<img src=\"%s\"", slideName)).append("\n");
+                        htmlImageTags.append("</div>\n");
+                    }
+                    final String html =
+                        "<!DOCTYPE html>\n" +
+                        "<html>\n" +
+                        "<body>\n" +
+                        "<h1>Slideshow</h1>\n" +
+                        htmlImageTags.toString() +
+                        "</body>\n" +
+                        "</html>\n";
+
+                    SFile.write(handle, html.getBytes());
+                    SFile.fsync(handle);
+                    SFile.close(handle);
+                } else {
+                    Main.logger.log(Level.SEVERE, handleResult.error.getMessage(), handleResult.error);
                 }
             }
         }
