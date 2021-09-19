@@ -530,9 +530,12 @@ public final class Display {
             final int availableCores = Runtime.getRuntime().availableProcessors();
             g.drawString(String.format("CPU cores: %s", availableCores), 16, 112);
 
-            g.drawString(String.format("Render dimension: %s:%s", canvas.getWidth(), canvas.getHeight()), 16, 128);
-            g.drawString(String.format("Aspect ratio: %s", currentAspectRatio), 16, 144);
-            g.drawString(String.format("Current slide: %s/%s", (slideIndex + 1), slideshow.length), 16, 160);
+            final double usage = ManagementFactory.getOperatingSystemMXBean().getSystemLoadAverage();
+            g.drawString(String.format("CPU usage avg: %s", usage), 16, 128);
+
+            g.drawString(String.format("Render dimension: %s:%s", canvas.getWidth(), canvas.getHeight()), 16, 144);
+            g.drawString(String.format("Aspect ratio: %s", currentAspectRatio), 16, 160);
+            g.drawString(String.format("Current slide: %s/%s", (slideIndex + 1), slideshow.length), 16, 176);
         }
     }
 
