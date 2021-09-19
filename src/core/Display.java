@@ -330,12 +330,26 @@ public final class Display {
                 // @NOTE recreate backbuffers since we deallocated the frame (peer)
                 createGraphics();
             }
-        } else if (inputHandler.isKeyDown(KeyEvent.VK_S)) {
+        } else if (inputHandler.isKeyPressed(KeyEvent.VK_CONTROL) && inputHandler.isKeyDown(KeyEvent.VK_S)) {
             Main.logger.log(Level.INFO, "Requested slideshow export.");
-            final boolean success = new SlideShowExporter(canvas, renderingHints, slideshow, "export").export();
-            if (!success) {
-                // @TODO: Let the user know via MessageBox.
+            final int answer = javax.swing.JOptionPane.showConfirmDialog(frame, "Are you sure you wish to export your slideshow to disk?", "Export", javax.swing.JOptionPane.YES_NO_OPTION);
+            if (answer == javax.swing.JOptionPane.YES_OPTION) {
+                final boolean success = new SlideShowExporter(canvas, renderingHints, slideshow, "export").export();
+                if (success) {
+                    javax.swing.JOptionPane.showMessageDialog(frame, "Exporting slideshow was successful!", "Export success", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+
+                    // @TODO: We might want the commented out code?
+                    /*try {
+                        java.awt.Desktop.getDesktop().open(new java.io.File("export/slideshow.html"));
+                    } catch (final java.io.IOException ex) {
+                        Main.logger.log(Level.SEVERE, ex.getMessage(), ex);
+                    }*/
+
+                } else {
+                    javax.swing.JOptionPane.showMessageDialog(frame, "Exporting slideshow has failed!", "Export failure", javax.swing.JOptionPane.ERROR_MESSAGE);
+                }
             }
+
         }
 
         inputHandler.update(); // @NOTE must be the last call inside this function!

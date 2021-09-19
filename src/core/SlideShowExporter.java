@@ -30,7 +30,7 @@ public final class SlideShowExporter {
 
     public boolean export() {
         final File dstDir = new File(dst);
-        if (!dstDir.mkdirs()) return false;
+        dstDir.mkdirs();
 
         for (int i = 0; i < slideshow.length; ++i) {
             final BufferedImage slideImage = new BufferedImage(canvas.getWidth(), canvas.getHeight(), BufferedImage.TYPE_INT_ARGB);
