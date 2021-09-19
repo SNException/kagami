@@ -10,7 +10,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-// /usr/bin/time -f "Total time elapsed: %e seconds" java.exe build.java
 public final class build {
 
     private static final String SOURCE_DIR      = "src";
