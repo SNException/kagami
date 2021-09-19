@@ -110,8 +110,12 @@ public final class build {
         }
     }
 
-    private static void run() {
-        runShellCommandAsync(".", (line) -> { System.out.print(line); }, JVM_LINE);
+    private static void run(final String... programArgs) {
+        final ArrayList<String> cmdLine = new ArrayList<>();
+        for (final String jvmArg : JVM_LINE) cmdLine.add(jvmArg);
+        for (final String programArg : programArgs) cmdLine.add(programArg);
+
+        runShellCommandAsync(".", (line) -> { System.out.print(line); }, cmdLine.toArray(String[]::new));
     }
 
     private static void build() {
@@ -171,7 +175,7 @@ public final class build {
 
     public static void main(final String[] args) {
         boolean wantToRun = false;
-        if (args.length == 1) {
+        if (args.length >= 1) {
             if (args[0].equals("run")) {
                 wantToRun = true;
             } else {
@@ -180,8 +184,16 @@ public final class build {
             }
         }
 
+
+        final ArrayList<String> programArgs = new ArrayList<>();
+        for (int i = 1; i < args.length; ++i) programArgs.add(args[i]);
+
         if (wantToRun) {
-            run();
+            if (args.length > 1) {
+                run(programArgs.toArray(String[]::new));
+            } else {
+                run();
+            }
         } else {
             build();
         }
