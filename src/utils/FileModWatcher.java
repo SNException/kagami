@@ -108,7 +108,7 @@ public final class FileModWatcher {
             } catch (final IOException ex) {
                 Main.logger.log(Level.SEVERE, ex.getMessage(), ex);
             } catch (final InterruptedException ex) {
-                assert false : "Not supposed to interrupt this.";
+                return;
             }
         }, "file_mod_watcher_smart_thread");
 
@@ -133,7 +133,7 @@ public final class FileModWatcher {
                     try {
                         Thread.sleep(500);
                     } catch (final InterruptedException ex) {
-                        assert false : "Not supposed to interrupt this.";
+                        return;
                     }
                 }
             }
