@@ -38,15 +38,15 @@ public final class SlideShowExporter {
             g.setRenderingHints(renderingHints);
             slideshow[i].render(g);
             try {
-                javax.imageio.ImageIO.write(slideImage, "png", new java.io.File("export/slide_" + (i + 1) + ".png"));
-            } catch (final java.io.IOException ex) {
+                ImageIO.write(slideImage, "png", new File("export/slide_" + (i + 1) + ".png"));
+            } catch (final IOException ex) {
                 Main.logger.log(Level.SEVERE, ex.getMessage(), ex);
                 return false;
             }
         }
-        final FResult<java.io.FileOutputStream> handleResult = SFile.openFileForWriting("export/slideshow.html");
+        final FResult<FileOutputStream> handleResult = SFile.openFileForWriting("export/slideshow.html");
         if (handleResult.success) {
-            final java.io.FileOutputStream handle = handleResult.data;
+            final FileOutputStream handle = handleResult.data;
             final StringBuilder htmlImageTags = new StringBuilder();
             for (int i = 0; i < slideshow.length; ++i) {
                 final String slideName = "slide_" + (i + 1) + ".png";
