@@ -330,6 +330,20 @@ public final class Display {
                 // @NOTE recreate backbuffers since we deallocated the frame (peer)
                 createGraphics();
             }
+        } else if (inputHandler.isKeyDown(KeyEvent.VK_S)) {
+            Main.logger.log(Level.INFO, "Requested slideshow export.");
+
+            for (int i = 0; i < slideshow.length; ++i) {
+                final BufferedImage slideImage = new BufferedImage(canvas.getWidth(), canvas.getHeight(), BufferedImage.TYPE_INT_ARGB);
+                final Graphics2D g = slideImage.createGraphics();
+                g.setRenderingHints(renderingHints);
+                slideshow[i].render(g);
+                try {
+                    javax.imageio.ImageIO.write(slideImage, "png", new java.io.File("slide_" + (i + 1) + ".png"));
+                } catch (final java.io.IOException ex) {
+                    Main.logger.log(Level.SEVERE, ex.getMessage(), ex);
+                }
+            }
         }
 
         inputHandler.update(); // @NOTE must be the last call inside this function!
