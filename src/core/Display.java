@@ -361,7 +361,7 @@ public final class Display {
                     for (int i = 0; i < slideshow.length; ++i) {
                         final String slideName = "slide_" + (i + 1) + ".png";
                         htmlImageTags.append("<div>\n");
-                        htmlImageTags.append(String.format("<img src=\"%s\"", slideName)).append("\n");
+                        htmlImageTags.append(String.format("<img src=\"%s\"", slideName)).append("\n"); // @TODO: size
                         htmlImageTags.append("</div>\n");
                     }
                     final String html =
