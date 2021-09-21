@@ -1,4 +1,2 @@
-@echo off
-
-SET JVM_FLAGS=-ea -Xms2048m -Xmx2048m -XX:+AlwaysPreTouch -XX:+UseG1GC
-java.exe %JVM_FLAGS% -cp bin Main
+@echo off 
+java.exe -ea -Xms2048m -Xmx2048m -XX:+AlwaysPreTouch -XX:+UseG1GC -cp "";bin Main 
