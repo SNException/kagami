@@ -3,3 +3,5 @@ bin
 export
 scratch.txt
 test.kagami
+run.bat
+run.sh

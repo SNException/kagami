@@ -291,7 +291,7 @@ public final class Display {
                 case EXTENDED : yield DebugLevel.NONE;
             };
         } else if (inputHandler.isKeyDown(KeyEvent.VK_M)) {
-            isMousePointerActive = !isMousePointerActive;
+            isMousePointerActive ^= true; // toggle boolean
             if (!frame.isUndecorated()) { // @NOTE when we are in 'presentation mode' the cursor is already invisible
                 if (isMousePointerActive) {
                     frame.setCursor(frame.getToolkit().createCustomCursor(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB), new Point(), null));

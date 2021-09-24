@@ -7,7 +7,7 @@ set compile_flags=-J-Xms2048m -J-Xmx2048m -J-XX:+UseG1GC -Xdiags:verbose -Xlint:
 
 set entry_point=Main
 set launch_file=run.bat
-set jvm_flags=-ea -Xms2048m -Xmx2048m -XX:+AlwaysPreTouch -XX:+UseG1GC
+set jvm_flags=-ea -Xms2048m -Xmx2048m -XX:+AlwaysPreTouch -XX:+UseG1GC -Xmixed
 
 if exist %out_dir% (
     rmdir /s /q %out_dir%
