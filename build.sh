@@ -12,7 +12,7 @@ if test -d $out_dir; then rm -r $out_dir;mkdir $out_dir; fi
 if test -f $launch_file; then rm $launch_file; fi
 
 find $src_dir -type f > sources.txt
-javac.exe $compile_flags -d $out_dir -sourcepath $src_dir @sources.txt
+"$JAVA_HOME/bin/javac.exe" $compile_flags -d $out_dir -sourcepath $src_dir @sources.txt
 
 if [ $? -eq 0 ]
 then

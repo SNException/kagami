@@ -17,7 +17,7 @@ if exist %out_dir% (
 if exist %launch_file% del %launch_file%
 
 dir /s /b %src_dir%\*.java > sources.txt
-javac.exe %compile_flags% -classpath %libs% -d %out_dir% -sourcepath %src_dir% @sources.txt
+"%JAVA_HOME%\bin\javac.exe" %compile_flags% -classpath %libs% -d %out_dir% -sourcepath %src_dir% @sources.txt
 
 if %ERRORLEVEL% == 0 (
     echo Build successful
