@@ -26,7 +26,11 @@ if %ERRORLEVEL% == 0 (
     echo Build failed
 )
 del sources.txt
-exit /b 0
+goto end
 
 :run
 "%JAVA_HOME%\bin\java.exe" %jvm_flags% -cp %libs%;bin %entry_point%
+goto end
+
+:end
+
