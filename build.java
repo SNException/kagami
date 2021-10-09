@@ -173,10 +173,8 @@ public final class build {
             }
             final String targetMethod = args[0].replace("--", "");
 
-            final Class clazz = build.class;
-            for (final Method method : clazz.getDeclaredMethods()) {
-                final int modifiers = method.getModifiers();
-                if (Modifier.isPublic(modifiers)) {
+            for (final Method method : build.class.getDeclaredMethods()) {
+                if (Modifier.isPublic(method.getModifiers())) {
                     if (method.getName().equals(targetMethod) && method.getAnnotation(Invokeable.class) != null) {
                         try {
                             method.invoke(null);
