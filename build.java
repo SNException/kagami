@@ -1,27 +1,11 @@
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.io.*;
+import java.lang.reflect.*;
+import java.nio.file.*;
+import java.util.*;
+import java.util.function.*;
+import java.util.stream.*;
 
 public final class build {
-
-    private static final String SOURCE_DIR      = "src";
-    private static final String OUTPUT_DIR      = "bin";
-    private static final String SOURCES_FILE    = "sources.txt";
-    private static final String COMPILER        = new File(System.getProperty("java.home") + File.separator + "bin" + File.separator + "javac.exe").getAbsolutePath();
-    private static final String RELEASE         = "17";
-    private static final String[] COMPILER_LINE = new String[] {COMPILER, "-J-Xms2048m", "-J-Xmx2048m", "-J-XX:+UseG1GC", "-Xdiags:verbose", "-Xlint:all", "-Xmaxerrs", "5", "-encoding", "UTF8", "--release", RELEASE, "-g", "-d", OUTPUT_DIR, "-sourcepath", SOURCE_DIR, "@" + SOURCES_FILE};
-
-    private static final String JVM_EXE         = new File(System.getProperty("java.home") + File.separator + "bin" + File.separator + "java.exe").getAbsolutePath();
-    private static final String ENTRY_CLASS     = "Main";
-    private static final String[] JVM_LINE      = new String[] {JVM_EXE, "-ea", "-Xms2048m", "-Xmx2048m", "-XX:+AlwaysPreTouch", "-XX:+UseG1GC", "-cp", OUTPUT_DIR, ENTRY_CLASS};
 
     private static boolean runShellCommand(final String cwd, final StringBuilder buffer, final String...cmdLine) {
         Process process = null;
@@ -110,15 +94,26 @@ public final class build {
         }
     }
 
-    private static void run(final String... programArgs) {
+    public static void run() {
+        final String OUTPUT_DIR      = "bin";
+        final String JVM_EXE         = new File(System.getProperty("java.home") + File.separator + "bin" + File.separator + "java.exe").getAbsolutePath();
+        final String ENTRY_CLASS     = "Main";
+        final String[] JVM_LINE      = new String[] {JVM_EXE, "-ea", "-Xms2048m", "-Xmx2048m", "-XX:+AlwaysPreTouch", "-XX:+UseG1GC", "-cp", OUTPUT_DIR, ENTRY_CLASS};
+
         final ArrayList<String> cmdLine = new ArrayList<>();
         for (final String jvmArg : JVM_LINE) cmdLine.add(jvmArg);
-        for (final String programArg : programArgs) cmdLine.add(programArg);
 
         runShellCommandAsync(".", (line) -> { System.out.print(line); }, cmdLine.toArray(String[]::new));
     }
 
-    private static void build() {
+    public static void build() {
+        final String SOURCE_DIR      = "src";
+        final String OUTPUT_DIR      = "bin";
+        final String SOURCES_FILE    = "sources.txt";
+        final String COMPILER        = new File(System.getProperty("java.home") + File.separator + "bin" + File.separator + "javac.exe").getAbsolutePath();
+        final String RELEASE         = "17";
+        final String[] COMPILER_LINE = new String[] {COMPILER, "-J-Xms2048m", "-J-Xmx2048m", "-J-XX:+UseG1GC", "-Xdiags:verbose", "-Xlint:all", "-Xmaxerrs", "5", "-encoding", "UTF8", "--release", RELEASE, "-g", "-d", OUTPUT_DIR, "-sourcepath", SOURCE_DIR, "@" + SOURCES_FILE};
+
         final String[] sources = getAllFiles(SOURCE_DIR, ".java");
         if (sources == null) {
             System.out.println("Failed to find all source files for the compiling step!");
@@ -149,53 +144,48 @@ public final class build {
         final StringBuilder javacOutputBuffer = new StringBuilder();
         final boolean compilationSuccess = runShellCommand(".", javacOutputBuffer, COMPILER_LINE);
         if (compilationSuccess) {
-            if (!javacOutputBuffer.toString().strip().isEmpty()) {
-                // can only be warnings
-                if (System.console() != null && System.getenv().get("TERM") != null) {
-                    final String ansiCodeReset = "\u001B[0m";
-                    final String ansiCodeYellow = "\u001B[33m";
-                    System.out.println(ansiCodeYellow + javacOutputBuffer.toString() + ansiCodeReset);
-                } else {
-                    System.out.println(javacOutputBuffer.toString());
-                }
-            }
-            System.out.println("Build successful");
+            if (!javacOutputBuffer.toString().isEmpty()) System.out.println(javacOutputBuffer.toString());
+            System.out.println("Build success");
         } else {
-            // can only be errors (and warnings)
-            if (System.console() != null && System.getenv().get("TERM") != null) {
-                final String ansiCodeReset  = "\u001B[0m";
-                final String ansiCodeRed   = "\u001B[31m";
-                System.out.println(ansiCodeRed + javacOutputBuffer.toString() + ansiCodeReset);
-            } else {
-                System.out.println(javacOutputBuffer.toString());
-            }
+            if (!javacOutputBuffer.toString().isEmpty()) System.out.println(javacOutputBuffer.toString());
             System.out.println("Build failed");
         }
     }
 
     public static void main(final String[] args) {
-        boolean wantToRun = false;
-        if (args.length >= 1) {
-            if (args[0].equals("run")) {
-                wantToRun = true;
-            } else {
-                System.out.println("First argument must either be not specified or 'run'");
-                System.exit(1);
-            }
+        if (args.length == 0) {
+            System.out.println("Please specify the function you wish to run!");
+            System.out.println("Example: java.exe ./build.java --build");
+            System.exit(1);
         }
 
-
-        final ArrayList<String> programArgs = new ArrayList<>();
-        for (int i = 1; i < args.length; ++i) programArgs.add(args[i]);
-
-        if (wantToRun) {
-            if (args.length > 1) {
-                run(programArgs.toArray(String[]::new));
-            } else {
-                run();
+        if (args.length == 1) {
+            if (!args[0].startsWith("--")) {
+                System.out.println("The method name must be prefixed with two dashes!");
+                System.exit(1);
             }
+            final String targetMethod = args[0].replace("--", "");
+
+            final Class clazz = build.class;
+            for (final Method method : clazz.getDeclaredMethods()) {
+                final int modifiers = method.getModifiers();
+                if (Modifier.isPublic(modifiers)) {
+                    if (method.getName().equals(targetMethod)) {
+                        try {
+                            method.invoke(null);
+                            System.exit(0);
+                        } catch (final Exception ex) {
+                            System.out.println("ERROR while executing the specified method: " + ex.getMessage());
+                            System.exit(1);
+                        }
+                    }
+                }
+            }
+            System.out.println("Failed to find the specified method! Make sure the method you wish to execute is 'public'.");
+            System.exit(1);
         } else {
-            build();
+            System.out.println("Too many arguments!");
+            System.exit(1);
         }
     }
 }
