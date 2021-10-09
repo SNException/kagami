@@ -95,10 +95,10 @@ public final class build {
     }
 
     public static void run() {
-        final String OUTPUT_DIR      = "bin";
-        final String JVM_EXE         = new File(System.getProperty("java.home") + File.separator + "bin" + File.separator + "java.exe").getAbsolutePath();
-        final String ENTRY_CLASS     = "Main";
-        final String[] JVM_LINE      = new String[] {JVM_EXE, "-ea", "-Xms2048m", "-Xmx2048m", "-XX:+AlwaysPreTouch", "-XX:+UseG1GC", "-cp", OUTPUT_DIR, ENTRY_CLASS};
+        final String OUTPUT_DIR  = "bin";
+        final String JVM_EXE     = new File(System.getProperty("java.home") + File.separator + "bin" + File.separator + "java.exe").getAbsolutePath();
+        final String ENTRY_CLASS = "Main";
+        final String[] JVM_LINE  = new String[] {JVM_EXE, "-ea", "-Xms2048m", "-Xmx2048m", "-XX:+AlwaysPreTouch", "-XX:+UseG1GC", "-cp", OUTPUT_DIR, ENTRY_CLASS};
 
         final ArrayList<String> cmdLine = new ArrayList<>();
         for (final String jvmArg : JVM_LINE) cmdLine.add(jvmArg);
