@@ -160,6 +160,11 @@ public final class build {
     }
 
     public static void main(final String[] args) {
+        if (!System.getProperty("java.version").equals("17")) {
+            System.out.println("build.java must be run with java version 17");
+            System.exit(1);
+        }
+
         if (args.length == 0) {
             System.out.println("Please specify the function you wish to run!");
             System.out.println("Example: java.exe ./build.java --build");
