@@ -80,9 +80,29 @@ public final class build {
         }
     }
 
-    private static boolean removeDir(final String dir) {
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
+    private @interface Invokeable {}
+
+    public static final BuildOptions buildOptions = new BuildOptions();
+
+    private static final class BuildOptions {
+        public String srcDir         = "src";
+        public String outDir         = "bin";
+        public String srcFiles       = "sources.txt";
+        public String compiler       = new File(System.getProperty("java.home") + File.separator + "bin" + File.separator + "javac.exe").getAbsolutePath();
+        public String release        = "17";
+        public String[] compilerLine = new String[] {compiler, "-J-Xms2048m", "-J-Xmx2048m", "-J-XX:+UseG1GC", "-Xdiags:verbose", "-Xlint:all", "-Xmaxerrs", "5", "-encoding", "UTF8", "--release", release, "-g", "-d", outDir, "-sourcepath", srcDir, "@" + srcFiles};
+
+        public String jvmExe     = new File(System.getProperty("java.home") + File.separator + "bin" + File.separator + "java.exe").getAbsolutePath();
+        public String entryClass = "Main";
+        public String[] jvmLine  = new String[] {jvmExe, "-ea", "-Xms2048m", "-Xmx2048m", "-XX:+AlwaysPreTouch", "-XX:+UseG1GC", "-cp", outDir, entryClass};
+    }
+
+    @Invokeable
+    public static boolean clean() {
         try {
-            final Path path = Path.of(dir);
+            final Path path = Path.of(buildOptions.outDir);
 
             Files.walk(path)
                     .map(Path::toFile)
@@ -95,44 +115,25 @@ public final class build {
         }
     }
 
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.METHOD)
-    private @interface Invokeable {}
-
     @Invokeable
     public static void run() {
-        final String OUTPUT_DIR  = "bin";
-        final String JVM_EXE     = new File(System.getProperty("java.home") + File.separator + "bin" + File.separator + "java.exe").getAbsolutePath();
-        final String ENTRY_CLASS = "Main";
-        final String[] JVM_LINE  = new String[] {JVM_EXE, "-ea", "-Xms2048m", "-Xmx2048m", "-XX:+AlwaysPreTouch", "-XX:+UseG1GC", "-cp", OUTPUT_DIR, ENTRY_CLASS};
-
-        final ArrayList<String> cmdLine = new ArrayList<>();
-        for (final String jvmArg : JVM_LINE) cmdLine.add(jvmArg);
-
-        runShellCommandAsync(".", (line) -> { System.out.print(line); }, cmdLine.toArray(String[]::new));
+        runShellCommandAsync(".", (line) -> { System.out.print(line); }, buildOptions.jvmLine);
     }
 
     @Invokeable
     public static void build() {
-        final String SOURCE_DIR      = "src";
-        final String OUTPUT_DIR      = "bin";
-        final String SOURCES_FILE    = "sources.txt";
-        final String COMPILER        = new File(System.getProperty("java.home") + File.separator + "bin" + File.separator + "javac.exe").getAbsolutePath();
-        final String RELEASE         = "17";
-        final String[] COMPILER_LINE = new String[] {COMPILER, "-J-Xms2048m", "-J-Xmx2048m", "-J-XX:+UseG1GC", "-Xdiags:verbose", "-Xlint:all", "-Xmaxerrs", "5", "-encoding", "UTF8", "--release", RELEASE, "-g", "-d", OUTPUT_DIR, "-sourcepath", SOURCE_DIR, "@" + SOURCES_FILE};
-
-        final String[] sources = getAllFiles(SOURCE_DIR, ".java");
+        final String[] sources = getAllFiles(buildOptions.srcDir, ".java");
         if (sources == null) {
             System.out.println("Failed to find all source files for the compiling step!");
             System.exit(1);
         }
 
-        try (final FileOutputStream out = new FileOutputStream(SOURCES_FILE, /* append */ true)) {
+        try (final FileOutputStream out = new FileOutputStream(buildOptions.srcFiles, /* append */ true)) {
             for (final String source : sources) {
                 out.write((source + "\n").getBytes());
             }
             out.flush();
-            new File(SOURCES_FILE).deleteOnExit();
+            new File(buildOptions.srcFiles).deleteOnExit();
         } catch (final IOException ex) {
             System.out.println("Failed to write sources file!");
             System.exit(1);
@@ -140,8 +141,8 @@ public final class build {
 
 
         // the directory will be recreated for us when we invoke the compiler with '-d'.
-        if (Files.exists(Path.of(OUTPUT_DIR))) {
-            final boolean success = removeDir(OUTPUT_DIR);
+        if (Files.exists(Path.of(buildOptions.outDir))) {
+            final boolean success = clean();
             if (!success) {
                 System.out.println("Failed to cleanup previous output files!");
                 System.exit(1);
@@ -149,7 +150,7 @@ public final class build {
         }
 
         final StringBuilder javacOutputBuffer = new StringBuilder();
-        final boolean compilationSuccess = runShellCommand(".", javacOutputBuffer, COMPILER_LINE);
+        final boolean compilationSuccess = runShellCommand(".", javacOutputBuffer, buildOptions.compilerLine);
         if (compilationSuccess) {
             if (!javacOutputBuffer.toString().isEmpty()) System.out.println(javacOutputBuffer.toString());
             System.out.println("Build success");
@@ -161,7 +162,7 @@ public final class build {
 
     public static void main(final String[] args) {
         if (!System.getProperty("java.version").equals("17")) {
-            System.out.println("build.java must be run with java version 17");
+            System.out.println("build.java must be executed with java version 17");
             System.exit(1);
         }
 
@@ -179,22 +180,22 @@ public final class build {
             final String targetMethod = args[0].replace("--", "");
 
             for (final Method method : build.class.getDeclaredMethods()) {
-                if (Modifier.isPublic(method.getModifiers())) {
-                    if (method.getName().equals(targetMethod) && method.getAnnotation(Invokeable.class) != null) {
-                        try {
-                            method.invoke(null);
-                            System.exit(0);
-                        } catch (final Exception ex) {
-                            System.out.println("ERROR while executing the specified method: " + ex.getMessage());
-                            System.exit(1);
-                        }
+                if (Modifier.isPublic(method.getModifiers()) && method.getName().equals(targetMethod) && method.getAnnotation(Invokeable.class) != null) {
+                    try {
+                        method.invoke(null);
+                        System.exit(0);
+                    } catch (final Exception ex) {
+                        System.out.printf("ERROR while executing the specified method: %s\n", ex.getMessage());
+                        System.exit(1);
                     }
                 }
             }
-            System.out.println("Failed to find the specified method! Make sure the method you wish to execute is 'public' and is annotated with @Invokeable.");
+            System.out.printf("Failed to find the specified function '%s'.\n", targetMethod);
+            System.out.println("Make sure the function you wish to execute is 'public' and is annotated with @Invokeable.");
             System.exit(1);
         } else {
             System.out.println("Too many arguments!");
+            System.out.println("Example: java.exe ./build.java --build");
             System.exit(1);
         }
     }
