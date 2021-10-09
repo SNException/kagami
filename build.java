@@ -1,4 +1,5 @@
 import java.io.*;
+import java.lang.annotation.*;
 import java.lang.reflect.*;
 import java.nio.file.*;
 import java.util.*;
@@ -94,6 +95,11 @@ public final class build {
         }
     }
 
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
+    private @interface Invokeable {}
+
+    @Invokeable
     public static void run() {
         final String OUTPUT_DIR  = "bin";
         final String JVM_EXE     = new File(System.getProperty("java.home") + File.separator + "bin" + File.separator + "java.exe").getAbsolutePath();
@@ -106,6 +112,7 @@ public final class build {
         runShellCommandAsync(".", (line) -> { System.out.print(line); }, cmdLine.toArray(String[]::new));
     }
 
+    @Invokeable
     public static void build() {
         final String SOURCE_DIR      = "src";
         final String OUTPUT_DIR      = "bin";
@@ -170,7 +177,7 @@ public final class build {
             for (final Method method : clazz.getDeclaredMethods()) {
                 final int modifiers = method.getModifiers();
                 if (Modifier.isPublic(modifiers)) {
-                    if (method.getName().equals(targetMethod)) {
+                    if (method.getName().equals(targetMethod) && method.getAnnotation(Invokeable.class) != null) {
                         try {
                             method.invoke(null);
                             System.exit(0);
@@ -181,7 +188,7 @@ public final class build {
                     }
                 }
             }
-            System.out.println("Failed to find the specified method! Make sure the method you wish to execute is 'public'.");
+            System.out.println("Failed to find the specified method! Make sure the method you wish to execute is 'public' and is annotated with @Invokeable.");
             System.exit(1);
         } else {
             System.out.println("Too many arguments!");
