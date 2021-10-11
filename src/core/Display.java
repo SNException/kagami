@@ -596,8 +596,8 @@ public final class Display {
                 } catch (final InvocationTargetException ex) {
                     if (ex.getCause() != null) {
                         final Throwable error = ex.getCause();
-                        if (error instanceof AssertionError) {
-                            Main.handleAssert((AssertionError) error);
+                        if (error instanceof AssertionError aerror) {
+                            Main.handleAssert(aerror);
                         } else {
                             // @TODO: Display dialog to user?
                             if (Main.isDebugMode()) error.printStackTrace(System.err);

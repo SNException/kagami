@@ -72,8 +72,8 @@ public final class Main {
         // whether the exception is an instance of AssertionError, which can not happen anyway.
         if (isDebugMode()) {
             Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
-                if (e instanceof AssertionError) {
-                    handleAssert((AssertionError) e);
+                if (e instanceof AssertionError aerror) {
+                    handleAssert(aerror);
                 }
 
                 // @NOTE fallthrough to the default behaviour (found here: ThreadGroup#uncaughtException)
