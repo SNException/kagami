@@ -32,6 +32,34 @@ public final class SlideShowFileParser {
         }
     }
 
+    public final record SlideShowMetaDataRec(int hz, float aspectRatio) {}
+
+    private final class Cursor {
+
+        public volatile int val = -1;
+
+        private final int limit;
+
+        public Cursor(final int limit) {
+            this.limit = limit;
+        }
+
+        public void unwind() {
+            if (val > 0) {
+                val -= 1;
+            }
+        }
+
+        public boolean advance() {
+            if (val >= limit) {
+                return false;
+            }
+            val += 1;
+            return true;
+        }
+    }
+
+
     public SlideShowMetaDataRec parseMetaData() throws ParseException {
         final StringBuilder fileContent = new StringBuilder();
         final boolean success = readFileIntoMemory(fileContent);
@@ -88,31 +116,6 @@ public final class SlideShowFileParser {
         }
 
         throw new ParseException("Error on line %s: Your first line must be the metadata!", 1);
-    }
-
-    private final class Cursor {
-
-        public volatile int val = -1;
-
-        private final int limit;
-
-        public Cursor(final int limit) {
-            this.limit = limit;
-        }
-
-        public void unwind() {
-            if (val > 0) {
-                val -= 1;
-            }
-        }
-
-        public boolean advance() {
-            if (val >= limit) {
-                return false;
-            }
-            val += 1;
-            return true;
-        }
     }
 
     public Slide[] parseSlides() throws ParseException {

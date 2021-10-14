@@ -90,7 +90,7 @@ public final class Main {
             final SlideShowFileParser parser = new SlideShowFileParser(slideshowFile);
 
             try {
-                final SlideShowMetaDataRec metaData = parser.parseMetaData();
+                final SlideShowFileParser.SlideShowMetaDataRec metaData = parser.parseMetaData();
                 display.initAndShow(metaData.hz(), metaData.aspectRatio());
             } catch (final SlideShowFileParser.ParseException ex) {
                 javax.swing.JOptionPane.showMessageDialog(null, ex.getMessage(), "Error parsing metadata", javax.swing.JOptionPane.ERROR_MESSAGE);

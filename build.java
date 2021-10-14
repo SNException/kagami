@@ -136,7 +136,13 @@ public final class build {
             if (!javacOutputBuffer.toString().isEmpty()) System.out.println(javacOutputBuffer.toString());
             System.out.println("Build failed");
         }
-     }
+    }
+
+    @Invokeable
+    public static void buildRelease() {
+        buildOptions.compilerLine = new String[] {buildOptions.compiler, "-J-Xms2048m", "-J-Xmx2048m", "-J-XX:+UseG1GC", "-Xdiags:verbose", "-Xlint:all", "-Xmaxerrs", "1", "-encoding", "UTF8", "--release", "17", "-g:none", "-d", buildOptions.outDir, "-sourcepath", buildOptions.srcDir, "@" + buildOptions.srcFiles};
+        build();
+    }
 
     public static void main(final String[] args) {
         if (!System.getProperty("java.version").equals("17")) {
