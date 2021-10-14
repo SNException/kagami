@@ -32,7 +32,7 @@ public final class SlideShowFileParser {
         }
     }
 
-    public SlideShowMetaData parseMetaData() throws ParseException {
+    public SlideShowMetaDataRec parseMetaData() throws ParseException {
         final StringBuilder fileContent = new StringBuilder();
         final boolean success = readFileIntoMemory(fileContent);
         if (!success) {
@@ -73,7 +73,7 @@ public final class SlideShowFileParser {
             final String aspectRatio = metaData[1];
             if (aspectRatio.equals("FILL")) {
                 Main.logger.log(Level.INFO, String.format("Parsed aspect ratio: %s", "FILL"));
-                return new SlideShowMetaData(hz, -1);
+                return new SlideShowMetaDataRec(hz, -1);
             }
 
             final String[] xy = aspectRatio.split(":");
@@ -84,7 +84,7 @@ public final class SlideShowFileParser {
             final float y = parseInteger(xy[1], 1);
             Main.logger.log(Level.INFO, String.format("Parsed aspect ratio: %s", x / y));
 
-            return new SlideShowMetaData(hz, x / y);
+            return new SlideShowMetaDataRec(hz, x / y);
         }
 
         throw new ParseException("Error on line %s: Your first line must be the metadata!", 1);

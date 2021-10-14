@@ -387,6 +387,7 @@ public final class Display {
                     }
 
                     for (final Slide slide : slideshow) {
+                        // @TODO: This makes the startup very slow (the slower the more slides we have)
                         slide.onResize(g, canvas.getWidth(), canvas.getHeight());
                     }
                     doResize = false;
