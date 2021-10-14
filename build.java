@@ -8,6 +8,8 @@ import java.util.stream.*;
 
 public final class build {
 
+    private build() { assert false; }
+
     private static boolean runShellCommand(final String cwd, final Consumer<String> callback, final String...cmdLine) {
         Process process = null;
         try {
@@ -68,8 +70,7 @@ public final class build {
         public String outDir         = "bin";
         public String srcFiles       = "sources.txt";
         public String compiler       = new File(System.getProperty("java.home") + File.separator + "bin" + File.separator + "javac.exe").getAbsolutePath();
-        public String release        = "17";
-        public String[] compilerLine = new String[] {compiler, "-J-Xms2048m", "-J-Xmx2048m", "-J-XX:+UseG1GC", "-Xdiags:verbose", "-Xlint:all", "-Xmaxerrs", "1", "-encoding", "UTF8", "--release", release, "-g", "-d", outDir, "-sourcepath", srcDir, "@" + srcFiles};
+        public String[] compilerLine = new String[] {compiler, "-J-Xms2048m", "-J-Xmx2048m", "-J-XX:+UseG1GC", "-Xdiags:verbose", "-Xlint:all", "-Xmaxerrs", "1", "-encoding", "UTF8", "--release", "17", "-g", "-d", outDir, "-sourcepath", srcDir, "@" + srcFiles};
 
         public String jvmExe     = new File(System.getProperty("java.home") + File.separator + "bin" + File.separator + "java.exe").getAbsolutePath();
         public String entryClass = "Main";
@@ -135,7 +136,7 @@ public final class build {
             if (!javacOutputBuffer.toString().isEmpty()) System.out.println(javacOutputBuffer.toString());
             System.out.println("Build failed");
         }
-    }
+     }
 
     public static void main(final String[] args) {
         if (!System.getProperty("java.version").equals("17")) {
@@ -145,7 +146,7 @@ public final class build {
 
         if (args.length == 0) {
             System.out.println("Please specify the function you wish to run!");
-            System.out.println("Example: java.exe ./build.java --build");
+            System.out.println("Example: java.exe ./build.java --foobar");
             System.exit(1);
         }
 
@@ -157,7 +158,7 @@ public final class build {
             final String targetMethod = args[0].replace("--", "");
 
             for (final Method method : build.class.getDeclaredMethods()) {
-                if (Modifier.isPublic(method.getModifiers()) && method.getName().equals(targetMethod) && method.getAnnotation(Invokeable.class) != null) {
+                if (Modifier.isPublic(method.getModifiers()) && method.getName().equals(targetMethod) && method.getAnnotation(Invokeable.class) != null && method.getParameterCount() == 0) {
                     try {
                         method.invoke(null);
                         System.exit(0);
@@ -168,7 +169,10 @@ public final class build {
                 }
             }
             System.out.printf("Failed to find the specified function '%s'.\n", targetMethod);
-            System.out.println("Make sure the function you wish to execute is 'public' and is annotated with @Invokeable.");
+            System.out.println("Make sure the function you wish to execute meets the following requirements:");
+            System.out.println("\t- The visibility is public");
+            System.out.println("\t- It is annotated with @Invokeable");
+            System.out.println("\t- Does not take any arguments");
             System.exit(1);
         } else {
             System.out.println("Too many arguments!");
