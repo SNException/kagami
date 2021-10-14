@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.logging.ConsoleHandler;
@@ -33,7 +34,7 @@ public final class Main {
             @Override
             public synchronized String format(final LogRecord log) {
                 return String.format("[%s][%s][%s#%s]: %s\n",
-                                    new Date(log.getMillis()),
+                                    new SimpleDateFormat("dd.MM.YYYY HH:mm:ss:SSS").format(new Date(log.getMillis())),
                                     log.getLevel().getLocalizedName(),
                                     log.getSourceClassName(),
                                     log.getSourceMethodName(),
