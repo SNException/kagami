@@ -106,12 +106,12 @@ public final class build {
             System.exit(1);
         }
 
+        new File(buildOptions.srcFiles).deleteOnExit();
         try (final FileOutputStream out = new FileOutputStream(buildOptions.srcFiles, /* append */ true)) {
             for (final String source : sources) {
                 out.write((source + "\n").getBytes());
             }
             out.flush();
-            new File(buildOptions.srcFiles).deleteOnExit();
         } catch (final IOException ex) {
             System.out.println("Failed to write sources file!");
             System.exit(1);
