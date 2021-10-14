@@ -1,1 +1,0 @@
-gvim.exe --remote-silent +__LINE__ src/__FILE__

@@ -77,29 +77,6 @@ You need to have OpenJDK 17 installed on your system.
 ### Universal
 
 ```
-java.exe build.java
+java.exe ./build.java --build
 ```
 
-### Windows
-
-```
-build.bat
-```
-
-To check build time you can do this:
-
-```
-powershell.exe Measure-Command {.\build.bat}
-```
-
-### Unix-System (bash)
-
-```
-./build.sh
-```
-
-To check build time you can do this:
-
-```
-/usr/bin/time -f "Total time elapsed: %e seconds" ./build.sh
-```

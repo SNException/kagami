@@ -8,30 +8,7 @@ import java.util.stream.*;
 
 public final class build {
 
-    private static boolean runShellCommand(final String cwd, final StringBuilder buffer, final String...cmdLine) {
-        Process process = null;
-        try {
-            final ProcessBuilder pb = new ProcessBuilder(cmdLine);
-            pb.directory(new File(cwd));
-            pb.redirectErrorStream(true);
-
-            process = pb.start();
-
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            for (;;) {
-                final String line = reader.readLine();
-                if (line == null) {
-                    break;
-                }
-                buffer.append(line).append("\n");
-            }
-        } catch (final IOException ex) {
-            return false;
-        }
-        return process.exitValue() == 0;
-    }
-
-    private static boolean runShellCommandAsync(final String cwd, final Consumer<String> callback, final String...cmdLine) {
+    private static boolean runShellCommand(final String cwd, final Consumer<String> callback, final String...cmdLine) {
         Process process = null;
         try {
             final ProcessBuilder pb = new ProcessBuilder(cmdLine);
@@ -92,7 +69,7 @@ public final class build {
         public String srcFiles       = "sources.txt";
         public String compiler       = new File(System.getProperty("java.home") + File.separator + "bin" + File.separator + "javac.exe").getAbsolutePath();
         public String release        = "17";
-        public String[] compilerLine = new String[] {compiler, "-J-Xms2048m", "-J-Xmx2048m", "-J-XX:+UseG1GC", "-Xdiags:verbose", "-Xlint:all", "-Xmaxerrs", "5", "-encoding", "UTF8", "--release", release, "-g", "-d", outDir, "-sourcepath", srcDir, "@" + srcFiles};
+        public String[] compilerLine = new String[] {compiler, "-J-Xms2048m", "-J-Xmx2048m", "-J-XX:+UseG1GC", "-Xdiags:verbose", "-Xlint:all", "-Xmaxerrs", "1", "-encoding", "UTF8", "--release", release, "-g", "-d", outDir, "-sourcepath", srcDir, "@" + srcFiles};
 
         public String jvmExe     = new File(System.getProperty("java.home") + File.separator + "bin" + File.separator + "java.exe").getAbsolutePath();
         public String entryClass = "Main";
@@ -117,7 +94,7 @@ public final class build {
 
     @Invokeable
     public static void run() {
-        runShellCommandAsync(".", (line) -> { System.out.print(line); }, buildOptions.jvmLine);
+        runShellCommand(".", (line) -> { System.out.print(line); }, buildOptions.jvmLine);
     }
 
     @Invokeable
@@ -150,7 +127,7 @@ public final class build {
         }
 
         final StringBuilder javacOutputBuffer = new StringBuilder();
-        final boolean compilationSuccess = runShellCommand(".", javacOutputBuffer, buildOptions.compilerLine);
+        final boolean compilationSuccess = runShellCommand(".", (line) -> { javacOutputBuffer.append(line); }, buildOptions.compilerLine);
         if (compilationSuccess) {
             if (!javacOutputBuffer.toString().isEmpty()) System.out.println(javacOutputBuffer.toString());
             System.out.println("Build success");
