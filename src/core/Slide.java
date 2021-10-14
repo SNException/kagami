@@ -9,11 +9,7 @@ import javax.sound.sampled.Clip;
 
 public final class Slide {
 
-    public static final class Audio {
-        public String file   = null;
-        public float decibel = 0;
-        public boolean loop  = false;
-    }
+    public static final record AudioRec(String file, float decibel, boolean loop) {}
 
     public static final class Argb {
         public Color color1 = Color.BLACK;
@@ -27,7 +23,7 @@ public final class Slide {
 
     private final String name;
     private final Argb argb;
-    private final Audio audio;;
+    private final AudioRec audio;;
     private final Element[] elements;
 
     private int screenWidth  = 0;
@@ -41,7 +37,7 @@ public final class Slide {
 
     private Clip clip = null;
 
-    public Slide(final String name, final Argb argb, final Audio audio, final Element... elements) {
+    public Slide(final String name, final Argb argb, final AudioRec audio, final Element... elements) {
         assert name != null;
         assert argb != null;
 
@@ -55,9 +51,9 @@ public final class Slide {
         Main.logger.log(Level.INFO, "Entering: " + name);
 
         if (audio != null) {
-            clip = AudioUtils.createAudioClip(audio.file, audio.decibel);
+            clip = AudioUtils.createAudioClip(audio.file(), audio.decibel());
             if (clip != null) {
-                AudioUtils.playAudioClip(clip, audio.loop);
+                AudioUtils.playAudioClip(clip, audio.loop());
             }
         }
     }
