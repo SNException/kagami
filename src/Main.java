@@ -27,8 +27,7 @@ public final class Main {
     private static Logger allocateLogger() {
         LogManager.getLogManager().reset();
         final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-        final boolean isDebug = isDebugMode();
-        logger.setLevel(isDebug ? Level.ALL : Level.SEVERE);
+        logger.setLevel(isDebugMode() ? Level.ALL : Level.SEVERE);
         final ConsoleHandler consoleHandler = new ConsoleHandler();
         consoleHandler.setFormatter(new SimpleFormatter() {
             @Override
@@ -42,7 +41,7 @@ public final class Main {
                 );
             }
         });
-        consoleHandler.setLevel(isDebug ? Level.ALL : Level.SEVERE);
+        consoleHandler.setLevel(isDebugMode() ? Level.ALL : Level.SEVERE);
         logger.addHandler(consoleHandler);
 
         return logger;
@@ -132,6 +131,8 @@ public final class Main {
     }
 
     public static void main(final String[] args) {
+        logger.log(Level.INFO, "Entered main()");
+
         if (isDebugMode()) {
             logger.log(Level.INFO, "Running with assertions enabled!");
         }
