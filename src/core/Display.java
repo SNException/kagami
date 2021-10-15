@@ -601,12 +601,10 @@ public final class Display {
                             Main.handleAssert(aerror);
                         } else {
                             // @TODO: Display dialog to user?
-                            if (Main.isDebugMode()) error.printStackTrace(System.err);
                             Main.logger.log(Level.SEVERE, error.getMessage(), error.toString());
                         }
                     } else {
                         // @TODO: Display dialog to user?
-                        if (Main.isDebugMode()) ex.printStackTrace(System.err);
                         Main.logger.log(Level.SEVERE, ex.getMessage(), ex);
                     }
                 } catch (final InterruptedException ex) {

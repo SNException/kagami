@@ -94,7 +94,7 @@ public final class Main {
             }
 
             final Lambdas.Unary<Void, SlideShowFileParser.ParseException> handleParseErrorLambda = (ex) -> {
-                if (isDebugMode()) ex.printStackTrace(System.err);
+                logger.log(Level.SEVERE, ex.getMessage(), ex);
                 display.destroyAllSlides();
                 display.showMessage(ex.getMessage());
                 AudioUtils.beep(); // @NOTE draw attention to in case it is behind the editor
