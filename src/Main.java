@@ -32,9 +32,9 @@ public final class Main {
         consoleHandler.setFormatter(new SimpleFormatter() {
             @Override
             public synchronized String format(final LogRecord log) {
-                return String.format("[%s][%s][%s#%s]: %s\n",
-                                    new SimpleDateFormat("dd.MM.YYYY HH:mm:ss:SSS").format(new Date(log.getMillis())),
+                return String.format("[%s] [%s] [%s.%s]: %s\n",
                                     log.getLevel().getLocalizedName(),
+                                    new SimpleDateFormat("dd.MM.YYYY HH:mm:ss:SSS").format(new Date(log.getMillis())),
                                     log.getSourceClassName(),
                                     log.getSourceMethodName(),
                                     log.getMessage()
