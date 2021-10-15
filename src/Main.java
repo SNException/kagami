@@ -48,10 +48,6 @@ public final class Main {
     }
 
     private static void initUncaughtExceptionHandler() {
-        if (GraphicsEnvironment.isHeadless()) {
-            System.out.println("Can not run on headless env!");
-        }
-
         // @NOTE We only want to apply this exception handler in dev mode so we do not waste CPU time checking
         // whether the exception is an instance of AssertionError, which can not happen anyway.
         if (isDebugMode()) {
@@ -135,6 +131,11 @@ public final class Main {
 
         if (isDebugMode()) {
             logger.log(Level.INFO, "Running with assertions enabled!");
+        }
+
+        if (GraphicsEnvironment.isHeadless()) {
+            System.out.println("Can not run on headless env!");
+            System.exit(1);
         }
 
         initUncaughtExceptionHandler();
