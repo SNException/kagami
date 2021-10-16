@@ -59,6 +59,21 @@ public final class build {
         }
     }
 
+    private static boolean clean(final String dir) {
+        try {
+            final Path path = Path.of(dir);
+
+            Files.walk(path)
+                    .map(Path::toFile)
+                    .sorted((o1, o2) -> -o1.compareTo(o2))
+                    .forEach(File::delete);
+
+            return true;
+        } catch (final IOException ex) {
+            return false;
+        }
+    }
+
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)
     private @interface Invokeable {}
@@ -78,18 +93,11 @@ public final class build {
     }
 
     @Invokeable
-    public static boolean clean() {
-        try {
-            final Path path = Path.of(buildOptions.outDir);
-
-            Files.walk(path)
-                    .map(Path::toFile)
-                    .sorted((o1, o2) -> -o1.compareTo(o2))
-                    .forEach(File::delete);
-
-            return true;
-        } catch (final IOException ex) {
-            return false;
+    public static void clean() {
+        final boolean success = clean(buildOptions.outDir);
+        if (!success) {
+            System.out.printf("Failed to clean '%s'!", buildOptions.outDir);
+            System.exit(1);
         }
     }
 
@@ -120,7 +128,7 @@ public final class build {
 
         // the directory will be recreated for us when we invoke the compiler with '-d'.
         if (Files.exists(Path.of(buildOptions.outDir))) {
-            final boolean success = clean();
+            final boolean success = clean(buildOptions.outDir);
             if (!success) {
                 System.out.println("Failed to cleanup previous output files!");
                 System.exit(1);
@@ -141,7 +149,51 @@ public final class build {
     @Invokeable
     public static void buildRelease() {
         buildOptions.compilerLine = new String[] {buildOptions.compiler, "-J-Xms2048m", "-J-Xmx2048m", "-J-XX:+UseG1GC", "-Xdiags:verbose", "-Xlint:all", "-Xmaxerrs", "1", "-encoding", "UTF8", "--release", "17", "-g:none", "-d", buildOptions.outDir, "-sourcepath", buildOptions.srcDir, "@" + buildOptions.srcFiles};
-        build();
+
+        final String releaseDir = "release";
+        if (Files.exists(Path.of(releaseDir))) {
+            final boolean success = clean(releaseDir);
+            if (!success) {
+                System.out.printf("Failed to clean '%s'!", releaseDir);
+                System.exit(1);
+            }
+        }
+
+        try {
+            Files.createDirectory(Path.of(releaseDir));
+
+            final String runLine = "@echo off\n \"" + buildOptions.jvmExe + "\" -Xms2048m -Xmx2048m -XX:+AlwaysPreTouch -XX:+UseG1GC -cp " + buildOptions.outDir + " " + buildOptions.entryClass;
+            Files.writeString(Path.of(releaseDir, "Kagami.bat"), runLine, StandardOpenOption.CREATE, StandardOpenOption.SYNC);
+
+            final String[] resources = getAllFiles("res", null);
+            if (resources == null) {
+                System.out.println("Failed to gather all resource files!");
+                System.exit(1);
+            }
+
+            final String resDir = "res";
+            Files.createDirectory(Path.of(releaseDir, resDir));
+            for (final String res : resources) {
+                Files.copy(Path.of(res), Path.of(releaseDir, res));
+            }
+
+            build();
+
+            final String[] binaries = getAllFiles(buildOptions.outDir, null);
+            if (binaries == null) {
+                System.out.println("Failed to gather all binary files!");
+                System.exit(1);
+            }
+
+            Files.createDirectory(Path.of(releaseDir, buildOptions.outDir));
+            for (final String bin : binaries) {
+                Files.copy(Path.of(bin), Path.of(releaseDir, bin));
+            }
+        } catch (final Exception ex) {
+            System.out.println("Failed to build the release: " + ex.toString());
+            ex.printStackTrace(System.err);
+            System.exit(1);
+        }
     }
 
     public static void main(final String[] args) {
