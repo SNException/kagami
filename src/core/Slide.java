@@ -9,7 +9,7 @@ import javax.sound.sampled.Clip;
 
 public final class Slide {
 
-    public static final record AudioRec(String file, float decibel, boolean loop) {}
+    public static final record AudioRec(String file, float decibel, boolean loop, boolean carry) {}
 
     public static final class Argb {
         public Color color1 = Color.BLACK;
@@ -28,6 +28,8 @@ public final class Slide {
 
     private int screenWidth  = 0;
     private int screenHeight = 0;
+
+    private boolean firstEnter = true;
 
     private GradientPaint gradient;
     private float gradientTargetX1;
@@ -51,18 +53,33 @@ public final class Slide {
         Main.logger.log(Level.INFO, "Entering: " + name);
 
         if (audio != null) {
-            clip = AudioUtils.createAudioClip(audio.file(), audio.decibel());
-            if (clip != null) {
-                AudioUtils.playAudioClip(clip, audio.loop());
+            if (firstEnter) {
+                clip = AudioUtils.createAudioClip(audio.file(), audio.decibel());
+                if (clip != null) {
+                    AudioUtils.playAudioClip(clip, audio.loop());
+                }
+            } else {
+                if (!audio.carry) { // @NOTE prevent audio files being played multiple times when reentering the same slide
+                    clip = AudioUtils.createAudioClip(audio.file(), audio.decibel());
+                    if (clip != null) {
+                        AudioUtils.playAudioClip(clip, audio.loop());
+                    }
+                }
             }
         }
+
+        firstEnter = false;
     }
 
     public void onExit() {
         Main.logger.log(Level.INFO, "Leaving: " + name);
 
-        if (clip != null) {
-            AudioUtils.stopAudioClip(clip);
+        if (audio != null) {
+            if (clip != null) {
+                if (!audio.carry) {
+                    AudioUtils.stopAudioClip(clip);
+                }
+            }
         }
     }
 

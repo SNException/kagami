@@ -193,7 +193,7 @@ public final class SlideShowFileParser {
 
                     case "AUDIO": {
                         final String[] args = val.split(";");
-                        if (args.length != 3) {
+                        if (args.length != 4) {
                             throw new ParseException("Error on line %s: Too few/many arguments for audio configuration!", cursor.val + 1);
                         }
 
@@ -207,8 +207,9 @@ public final class SlideShowFileParser {
                         final String sfile   = args[0];
                         final float decibel = parseInteger(args[1], cursor);
                         final boolean loop  = parseBoolean(args[2], cursor);
+                        final boolean carry = parseBoolean(args[3], cursor);
 
-                        audio = new Slide.AudioRec(sfile, decibel, loop);
+                        audio = new Slide.AudioRec(sfile, decibel, loop, carry);
                     } break;
 
                     default: {
