@@ -30,6 +30,13 @@ public final class build {
         } catch (final IOException ex) {
             return false;
         }
+
+        try {
+            process.waitFor();
+        } catch (final InterruptedException ex) {
+            assert false : String.format("Not supposed to interrupt thread '%s'.");
+        }
+
         return process.exitValue() == 0;
     }
 
@@ -84,10 +91,10 @@ public final class build {
         public String srcDir         = "src";
         public String outDir         = "bin";
         public String srcFiles       = "sources.txt";
-        public String compiler       = new File(System.getProperty("java.home") + File.separator + "bin" + File.separator + "javac.exe").getAbsolutePath();
+        public String compiler       = new File(System.getProperty("java.home") + File.separator + "bin" + File.separator + "javac").getAbsolutePath();
         public String[] compilerLine = new String[] {compiler, "-J-Xms2048m", "-J-Xmx2048m", "-J-XX:+UseG1GC", "-Xdiags:verbose", "-Xlint:all", "-Xmaxerrs", "1", "-encoding", "UTF8", "--release", "17", "-g", "-d", outDir, "-sourcepath", srcDir, "@" + srcFiles};
 
-        public String jvmExe     = new File(System.getProperty("java.home") + File.separator + "bin" + File.separator + "java.exe").getAbsolutePath();
+        public String jvmExe     = new File(System.getProperty("java.home") + File.separator + "bin" + File.separator + "java").getAbsolutePath();
         public String entryClass = "Main";
         public String[] jvmLine  = new String[] {jvmExe, "-ea", "-Xms2048m", "-Xmx2048m", "-XX:+AlwaysPreTouch", "-XX:+UseG1GC", "-cp", outDir, entryClass};
     }
@@ -197,14 +204,14 @@ public final class build {
     }
 
     public static void main(final String[] args) {
-        if (!System.getProperty("java.version").equals("17")) {
-            System.out.println("build.java must be executed with java version 17");
+        if (!System.getProperty("java.version").equals("17.0.2")) {
+            System.out.println("build.java must be executed with java version 17.0.2");
             System.exit(1);
         }
 
         if (args.length == 0) {
             System.out.println("Please specify the function you wish to run!");
-            System.out.println("Example: java.exe ./build.java --foobar");
+            System.out.println("Example: java ./build.java --foobar");
             System.exit(1);
         }
 
@@ -235,7 +242,7 @@ public final class build {
             System.exit(1);
         } else {
             System.out.println("Too many arguments!");
-            System.out.println("Example: java.exe ./build.java --build");
+            System.out.println("Example: java ./build.java --build");
             System.exit(1);
         }
     }

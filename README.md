@@ -72,11 +72,11 @@ y=0.8
 
 ## How to build
 
-You need to have OpenJDK 17 installed on your system.
+You need to have OpenJDK 17.0.2 installed on your system.
 
 ### Universal
 
 ```
-java.exe ./build.java --build
+java ./build.java --build
 ```
 
